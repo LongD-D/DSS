@@ -2,61 +2,61 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Редагування задачі</title>
+    <title>编辑任务</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
 <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-center">Редагувати задачу</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">编辑任务</h1>
     <input type="hidden" id="taskId" th:value="${task.id}">
 
 
     <form id="edit-task-form" class="space-y-4">
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="title">Назва задачі</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="title">任务名称</label>
             <input type="text" id="title" class="w-full border rounded px-4 py-2" th:value="${task.title}">
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">Опис задачі</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="description">任务描述</label>
             <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" th:text="${task.description}"></textarea>
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="category">Категорія</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="category">类别</label>
             <select id="category" class="w-full border rounded px-4 py-2">
-                <option value="ENERGETIC" th:selected="${task.category.name() == 'ENERGETIC'}">Енергетика</option>
-                <option value="ECONOMY" th:selected="${task.category.name() == 'ECONOMY'}">Економіка</option>
-                <option value="ECOLOGY" th:selected="${task.category.name() == 'ECOLOGY'}">Екологія</option>
+                <option value="ENERGETIC" th:selected="${task.category.name() == 'ENERGETIC'}">能源</option>
+                <option value="ECONOMY" th:selected="${task.category.name() == 'ECONOMY'}">经济</option>
+                <option value="ECOLOGY" th:selected="${task.category.name() == 'ECOLOGY'}">生态</option>
             </select>
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="status">Статус</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="status">状态</label>
             <select id="status" class="w-full border rounded px-4 py-2">
-                <option value="NEW" th:selected="${task.status.name() == 'NEW'}">Нова</option>
-                <option value="SOLVED" th:selected="${task.status.name() == 'SOLVED'}">Вирішена</option>
-                <option value="EMERGENCY" th:selected="${task.status.name() == 'EMERGENCY'}">Термінова</option>
+                <option value="NEW" th:selected="${task.status.name() == 'NEW'}">新建</option>
+                <option value="SOLVED" th:selected="${task.status.name() == 'SOLVED'}">已解决</option>
+                <option value="EMERGENCY" th:selected="${task.status.name() == 'EMERGENCY'}">紧急</option>
             </select>
         </div>
 
         <!-- Параметри -->
         <div>
-            <h2 class="text-xl font-semibold mt-6 mb-2">Параметри задачі</h2>
+            <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
                 <div th:each="parameter : ${task.taskParameters}" class="border p-4 rounded bg-gray-50 parameter-block relative">
                     <div class="flex gap-4">
@@ -75,13 +75,13 @@
                 </div>
             </div>
             <button type="button" id="add-param" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-                Додати параметр
+                添加参数
             </button>
         </div>
 
         <div class="flex justify-center mt-8">
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">
-                Зберегти зміни
+                保存修改
             </button>
         </div>
     </form>

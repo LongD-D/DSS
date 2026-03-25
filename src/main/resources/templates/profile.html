@@ -2,7 +2,7 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Профіль користувача</title>
+    <title>用户资料</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -13,11 +13,11 @@
     </h1>
 
     <div class="space-y-4 text-gray-700">
-        <p><span class="font-semibold">Ім'я:</span> <span th:text="${user.name}">Ім’я</span></p>
+        <p><span class="font-semibold">Ім'я:</span> <span th:text="${user.name}">姓名：</span></p>
         <p><span class="font-semibold">Email:</span> <span th:text="${user.email}">email@example.com</span></p>
 
         <div>
-            <span class="font-semibold">Ролі:</span>
+            <span class="font-semibold">角色：</span>
             <ul class="list-disc list-inside ml-4" th:each="role : ${user.roles}">
                 <li th:text="${role.name}">ROLE_USER</li>
             </ul>
@@ -26,10 +26,10 @@
 
     <div class="mt-6 text-center">
         <a href="/" class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            На головну
+            返回首页
         </a>
         <a th:href="@{/logout}" class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-            Вийти
+            退出
         </a>
     </div>
 </div>

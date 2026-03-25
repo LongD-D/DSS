@@ -10,31 +10,31 @@
 <body>
 <header class="bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
 
 <div class="container mt-4" id="admin-section" style="display: none;">
-    <h2 class="mb-4">Список зареєстрованих користувачів</h2>
+    <h2 class="mb-4">已注册用户列表</h2>
     <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark text-center">
         <tr>
             <th>ID</th>
-            <th>Ім'я</th>
-            <th>Роль</th>
+            <th>姓名</th>
+            <th>角色</th>
             <th>Email</th>
-            <th>Телефон</th>
-            <th>Оновити роль</th>
-            <th>Дія</th>
+            <th>电话</th>
+            <th>更新角色</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody id="user-table-body">
@@ -52,11 +52,11 @@
                         <option th:each="role : ${roles}" th:value="${role.name}" th:text="${role.ukrName}"
                                 th:selected="${user.roles.contains(role)}"></option>
                     </select>
-                    <button class="btn btn-sm btn-primary change-role-btn">Змінити</button>
+                    <button class="btn btn-sm btn-primary change-role-btn">修改</button>
                 </div>
             </td>
             <td>
-                <button class="btn btn-sm btn-danger delete-user-btn">Видалити</button>
+                <button class="btn btn-sm btn-danger delete-user-btn">删除</button>
             </td>
         </tr>
         </tbody>

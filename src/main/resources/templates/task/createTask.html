@@ -22,50 +22,50 @@
 </header>
 
 <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-center">Створити нову задачу</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">创建新任务</h1>
 
     <form id="create-task-form" class="space-y-4">
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="title">Назва задачі</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="title">任务名称</label>
             <input type="text" id="title" class="w-full border rounded px-4 py-2" placeholder="Введіть назву">
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">Опис задачі</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="description">任务描述</label>
             <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="Введіть опис"></textarea>
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="category">Категорія</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="category">类别</label>
             <select id="category" class="w-full border rounded px-4 py-2">
-                <option value="ENERGETIC">Енергетика</option>
-                <option value="ECONOMY">Економіка</option>
-                <option value="ECOLOGY">Екологія</option>
+                <option value="ENERGETIC">能源</option>
+                <option value="ECONOMY">经济</option>
+                <option value="ECOLOGY">生态</option>
             </select>
         </div>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="status">Статус</label>
+            <label class="block text-gray-700 font-semibold mb-2" for="status">状态</label>
             <select id="status" class="w-full border rounded px-4 py-2">
-                <option value="NEW">Нова</option>
-                <option value="SOLVED">Вирішена</option>
-                <option value="EMERGENCY">Термінова</option>
+                <option value="NEW">新建</option>
+                <option value="SOLVED">已解决</option>
+                <option value="EMERGENCY">紧急</option>
             </select>
         </div>
 
         <div>
-            <h2 class="text-xl font-semibold mt-6 mb-2">Параметри задачі</h2>
+            <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
                 <!-- Тут будуть параметри -->
             </div>
             <button type="button" id="add-param" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-                Додати параметр
+                添加参数
             </button>
         </div>
 
         <div class="flex justify-center mt-8">
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">
-                Створити задачу
+                创建任务
             </button>
         </div>
     </form>

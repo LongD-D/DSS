@@ -18,12 +18,12 @@
         <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">决策</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
@@ -33,11 +33,11 @@
     <div class="row col-md-8 offset-md-2">
         <div class="card">
             <div class="card-header">
-                <h2 class="text-center">Registration</h2>
+                <h2 class="text-center">注册</h2>
             </div>
             <div th:if="${param.success}">
                 <div class="alert alert-info">
-                    You have successfully registered our app!
+                    注册成功
                 </div>
             </div>
             <div class="card-body">
@@ -48,7 +48,7 @@
                         th:object="${user}"
                 >
                     <div class="form-group mb-3">
-                        <label class="form-label">First Name</label>
+                        <label class="form-label">姓</label>
                         <input
                                 class="form-control"
                                 id="firstName"
@@ -64,7 +64,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">Last Name</label>
+                        <label class="form-label">名</label>
                         <input
                                 class="form-control"
                                 id="lastName"
@@ -94,7 +94,7 @@
                     </div>
 
                     <div class="form-group mb-3">
-                        <label class="form-label">Phone number</label>
+                        <label class="form-label">电话号码</label>
                         <input
                                 class="form-control"
                                 id="phone_number"
@@ -108,7 +108,7 @@
                            th:if="${#fields.hasErrors('phone_number')}"></p>
                     </div>
                     <div class="form-group mb-3">
-                        <label class="form-label">Password</label>
+                        <label class="form-label">密码</label>
                         <input
                                 class="form-control"
                                 id="password"
@@ -123,7 +123,7 @@
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" type="submit">Register</button>
-                        <span>Already registered? <a th:href="@{/login}">Login here</a></span>
+                        <span>已有帐户? <a th:href="@{/login}">点此登录</a></span>
                     </div>
                 </form>
             </div>

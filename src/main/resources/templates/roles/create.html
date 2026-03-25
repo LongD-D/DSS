@@ -8,28 +8,28 @@
 <body class="p-4">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
 <div class="container" id="admin-role-section" style="display: none;">
-    <h2 class="mb-4" id="form-title">Створити нову роль</h2>
+    <h2 class="mb-4" id="form-title">创建新角色</h2>
 
     <form id="role-form">
         <div class="mb-3">
-            <label for="name" class="form-label">Назва ролі</label>
+            <label for="name" class="form-label">角色名称</label>
             <input type="text" class="form-control" id="name" name="name" placeholder="ROLE_USER" required>
         </div>
-        <button type="submit" class="btn btn-primary" id="submit-button">Створити</button>
-        <a href="/roles" class="btn btn-secondary">Назад</a>
+        <button type="submit" class="btn btn-primary" id="submit-button">创建</button>
+        <a href="/roles" class="btn btn-secondary">返回</a>
     </form>
 </div>
 
