@@ -2,7 +2,7 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Список задач</title>
+    <title>任务列表</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -39,7 +39,7 @@
             <option value="SOLVED" th:selected="${param.status == 'SOLVED'}">已解决</option>
             <option value="EMERGENCY" th:selected="${param.status == 'EMERGENCY'}">紧急</option>
         </select>
-        <input type="text" name="user" placeholder="Пошук за іменем" class="border rounded px-4 py-2" th:value="${param.user}">
+        <input type="text" name="user" placeholder="按姓名搜索" class="border rounded px-4 py-2" th:value="${param.user}">
         <select name="sort" class="border rounded px-4 py-2">
             <option value="">排序</option>
             <option value="created-desc" th:selected="${param.sort == 'created-desc'}">最新优先</option>

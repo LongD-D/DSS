@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Деталі Рішення</title>
+    <title>Деталі 方案</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
@@ -10,33 +10,33 @@
 
     <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+            <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
             <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-                <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-                <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-                <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-                <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-                <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-                <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+                <a href="/tasks" class="hover:text-blue-600">任务</a>
+                <a href="/decisions" class="hover:text-blue-600">方案</a>
+                <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+                <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+                <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+                <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
             </nav>
         </div>
     </header>
 
     <a th:href="@{'/tasks/'+${decision.task.id}}" class="space-y-2" style="display: block">
-        <h2 class="text-xl font-bold">Пов'язана задача</h2>
-        <p><strong>Назва:</strong> <span th:text="${decision.task.title}"></span></p>
-        <p><strong>Опис:</strong> <span th:text="${decision.task.description}"></span></p>
-        <p><strong>Категорія:</strong> <span th:text="${decision.task.category.label}"></span></p>
-        <p><strong>Статус:</strong> <span th:text="${decision.task.status.label}"></span></p>
+        <h2 class="text-xl font-bold">Пов'язана 任务а</h2>
+        <p><strong>名称：</strong> <span th:text="${decision.task.title}"></span></p>
+        <p><strong>描述：</strong> <span th:text="${decision.task.description}"></span></p>
+        <p><strong>类别：</strong> <span th:text="${decision.task.category.label}"></span></p>
+        <p><strong>状态：</strong> <span th:text="${decision.task.status.label}"></span></p>
 
-        <h3 class="text-lg font-semibold mt-4">Параметри задачі</h3>
+        <h3 class="text-lg font-semibold mt-4">任务参数</h3>
         <table class="w-full border text-sm">
             <thead class="bg-gray-100">
             <tr>
-                <th class="p-2 border">Назва</th>
-                <th class="p-2 border">Вага</th>
-                <th class="p-2 border">Одиниця</th>
+                <th class="p-2 border">名称</th>
+                <th class="p-2 border">权重</th>
+                <th class="p-2 border">单位</th>
             </tr>
             </thead>
             <tbody>
@@ -49,36 +49,36 @@
         </table>
     </a>
 
-    <!-- Рішення -->
+    <!-- 方案 -->
     <div class="space-y-2">
         <h1 class="text-2xl font-bold">
-            Рішення #<span id="decision-id" th:text="${decision.id}">ID</span>
+            方案 #<span id="decision-id" th:text="${decision.id}">ID</span>
         </h1>
 
-        <p><strong>Тип:</strong> <span th:text="${decision.task.category.label}"></span></p>
-        <p><strong>Назва:</strong> <span th:text="${decision.title}"></span></p>
-        <p><strong>Опис:</strong> <span th:text="${decision.description}"></span></p>
-        <p><strong>Створено:</strong> <span th:text="${decision.created}"></span></p>
-        <p><strong>Автор:</strong> <span id="decision-user-id" th:data-user-id="${decision.user.id}" th:text="${decision.user.name}">Автор</span></p>
-        <p><strong>Статус:</strong> <span id="decision-status" th:text="${decision.decisionStatus.ukrName}">STATUS</span></p>
-        <p><strong>Рейтинг:</strong> <span th:text="${#numbers.formatDecimal(decision.getRate(), 1, 2) + '/10'}"></span></p>
-        <p><strong>Кількість оцінок:</strong> <span th:text="${decision.expertEvaluations.size()}"></span></p>
+        <p><strong>类型：</strong> <span th:text="${decision.task.category.label}"></span></p>
+        <p><strong>名称：</strong> <span th:text="${decision.title}"></span></p>
+        <p><strong>描述：</strong> <span th:text="${decision.description}"></span></p>
+        <p><strong>创建于:</strong> <span th:text="${decision.created}"></span></p>
+        <p><strong>作者：</strong> <span id="decision-user-id" th:data-user-id="${decision.user.id}" th:text="${decision.user.name}">Автор</span></p>
+        <p><strong>状态：</strong> <span id="decision-status" th:text="${decision.decisionStatus.ukrName}">STATUS</span></p>
+        <p><strong>评分：</strong> <span th:text="${#numbers.formatDecimal(decision.getRate(), 1, 2) + '/10'}"></span></p>
+        <p><strong>评分数量：</strong> <span th:text="${decision.expertEvaluations.size()}"></span></p>
         <!-- Блок кнопок автора -->
         <div id="action-buttons" class="bg-white p-4 rounded shadow flex flex-wrap gap-4 items-center">
-            <a href="/decisions" class="text-blue-600 hover:underline">← Назад до списку</a>
+            <a href="/decisions" class="text-blue-600 hover:underline">← 返回 до списку</a>
         </div>
     </div>
 
-    <!-- Параметри рішення -->
+    <!-- 参数и 方案 -->
     <div>
-        <h2 class="text-xl font-bold mb-4">Параметри рішення</h2>
+        <h2 class="text-xl font-bold mb-4">参数и 方案</h2>
         <table class="w-full border text-sm">
             <thead class="bg-gray-100">
             <tr>
-                <th class="p-2 border">Параметр</th>
-                <th class="p-2 border">Значення</th>
-                <th class="p-2 border">Одиниця</th>
-                <th class="p-2 border">Коментар</th>
+                <th class="p-2 border">参数</th>
+                <th class="p-2 border">值</th>
+                <th class="p-2 border">单位</th>
+                <th class="p-2 border">评论</th>
             </tr>
             </thead>
             <tbody>
@@ -95,7 +95,7 @@
     <button
             id="rate-decision-button"
             class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded ml-4 mt-2 hidden">
-        Оцінити рішення
+        评分 方案
     </button>
 
 
@@ -103,7 +103,7 @@
     <!-- Панель аналітика -->
     <div id="analyst-panel" class="hidden bg-white p-6 rounded shadow space-y-4">
         <div>
-            <label for="analyst-comment" class="block mb-2 text-sm font-medium text-gray-700">Коментар (необов’язково):</label>
+            <label for="analyst-comment" class="block mb-2 text-sm font-medium text-gray-700">评论 (необов’язково):</label>
             <textarea id="analyst-comment" rows="3" class="w-full border p-2 rounded"></textarea>
         </div>
         <div class="flex flex-wrap gap-4" id="status-buttons"></div>
@@ -118,8 +118,8 @@
             <tr>
                 <th class="border p-2">Експерт</th>
                 <th class="border p-2">Роль</th>
-                <th class="border p-2">Оцінка</th>
-                <th class="border p-2">Коментар</th>
+                <th class="border p-2">评分</th>
+                <th class="border p-2">评论</th>
             </tr>
             </thead>
             <tbody>
@@ -137,14 +137,14 @@
 
 <div id="rate-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-center">Оцінити рішення</h2>
-        <label class="block mb-2">Оцінка (0-10):</label>
+        <h2 class="text-xl font-bold mb-4 text-center">评分 方案</h2>
+        <label class="block mb-2">评分 (0-10)：</label>
         <input type="number" id="rate-score" class="w-full border p-2 rounded mb-4" min="0" max="10" step="0.1">
-        <label class="block mb-2">Коментар (необов'язково):</label>
+        <label class="block mb-2">评论（可选）：</label>
         <textarea id="rate-comment" class="w-full border p-2 rounded mb-4"></textarea>
         <div class="flex justify-end gap-4">
-            <button onclick="submitRate()" class="bg-green-500 text-white py-2 px-4 rounded">Надіслати</button>
-            <button onclick="closeRateModal()" class="bg-gray-400 text-white py-2 px-4 rounded">Скасувати</button>
+            <button onclick="submitRate()" class="bg-green-500 text-white py-2 px-4 rounded">提交</button>
+            <button onclick="closeRateModal()" class="bg-gray-400 text-white py-2 px-4 rounded">取消</button>
         </div>
     </div>
 </div>
@@ -175,13 +175,13 @@
                 const editBtn = document.createElement('a');
                 editBtn.href = `/decisions/${decisionId}/edit`;
                 editBtn.className = 'text-yellow-600 hover:underline';
-                editBtn.innerText = 'Редагувати';
+                editBtn.innerText = '编辑';
 
                 const deleteBtn = document.createElement('button');
-                deleteBtn.innerText = 'Видалити';
+                deleteBtn.innerText = '删除';
                 deleteBtn.className = 'text-red-600 hover:underline';
                 deleteBtn.onclick = () => {
-                    if (confirm('Ви впевнені, що хочете видалити це рішення?')) deleteDecision();
+                    if (confirm('Ви впевнені, що хочете 删除 це 方案?')) deleteDecision();
                 };
 
                 container.appendChild(editBtn);
@@ -240,10 +240,10 @@
         })
             .then(res => {
                 if (res.ok) {
-                    alert('Статус оновлено!');
+                    alert('状态 已更新!');
                     location.reload();
                 } else {
-                    alert('Помилка оновлення статусу');
+                    alert('错误 оновлення статусу');
                 }
             });
     }
@@ -255,15 +255,15 @@
         })
             .then(res => {
                 if (res.status === 204) {
-                    alert('Рішення видалено');
+                    alert('方案 видалено');
                     window.location.href = '/decisions';
                 } else {
-                    return res.text().then(msg => { throw new Error(msg || 'Помилка видалення'); });
+                    return res.text().then(msg => { throw new Error(msg || '错误 видалення'); });
                 }
             })
             .catch(err => {
                 console.error(err);
-                alert('Не вдалося видалити рішення');
+                alert('无法 删除 方案');
             });
     }
 </script>

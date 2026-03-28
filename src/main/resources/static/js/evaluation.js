@@ -27,7 +27,7 @@ function openRateModal(decisionId) {
             }
         })
         .catch(error => {
-            console.error('Помилка при завантаженні попередньої оцінки:', error);
+            console.error('错误 при завантаженні попередньої оцінки:', error);
         });
 }
 
@@ -43,12 +43,12 @@ function submitRate() {
     const comment = document.getElementById('rate-comment').value;
 
     if (!selectedDecisionId) {
-        alert('ID рішення не визначено');
+        alert('未指定方案 ID');
         return;
     }
 
     if (isNaN(score) || score < 0 || score > 10) {
-        alert('Будь ласка, введіть оцінку від 0 до 10.');
+        alert('请输入 0 到 10 之间的评分。');
         return;
     }
 
@@ -61,16 +61,16 @@ function submitRate() {
         body: JSON.stringify({ score, comment, decisionId: selectedDecisionId })
     })
         .then(response => {
-            if (!response.ok) throw new Error('Помилка при оцінюванні');
+            if (!response.ok) throw new Error('错误 при оцінюванні');
             return response.json();
         })
         .then(() => {
-            alert('Оцінку збережено!');
+            alert('评分已保存！');
             closeRateModal();
             location.reload();
         })
         .catch(error => {
-            console.error('Помилка при збереженні оцінки:', error);
-            alert('Не вдалося зберегти оцінку');
+            console.error('错误 при 保存时 оцінки:', error);
+            alert('无法保存评分');
         });
 }

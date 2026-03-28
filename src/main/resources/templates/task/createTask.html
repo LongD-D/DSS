@@ -2,21 +2,21 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Створення задачі</title>
+    <title>创建任务</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">方案</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
@@ -27,12 +27,12 @@
     <form id="create-task-form" class="space-y-4">
         <div>
             <label class="block text-gray-700 font-semibold mb-2" for="title">任务名称</label>
-            <input type="text" id="title" class="w-full border rounded px-4 py-2" placeholder="Введіть назву">
+            <input type="text" id="title" class="w-full border rounded px-4 py-2" placeholder="请输入名称">
         </div>
 
         <div>
             <label class="block text-gray-700 font-semibold mb-2" for="description">任务描述</label>
-            <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="Введіть опис"></textarea>
+            <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入描述"></textarea>
         </div>
 
         <div>
@@ -56,7 +56,7 @@
         <div>
             <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
-                <!-- Тут будуть параметри -->
+                <!-- Тут будуть 参数 -->
             </div>
             <button type="button" id="add-param" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
                 添加参数
@@ -81,12 +81,12 @@
         paramBlock.className = 'border p-4 rounded bg-gray-50 parameter-block relative mt-2';
         paramBlock.innerHTML = `
         <div class="flex gap-4">
-            <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="Назва">
-            <input type="number" step="0.1" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="Вага">
-            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="Одиниця виміру">
+            <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="名称">
+            <input type="number" step="0.1" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="权重">
+            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 виміру">
             <select id="opt-dir" class="opt-dir w-full border rounded px-4 py-2">
-                <option>Мінімізація</option>
-                <option>Максимізація</option>
+                <option>最小化</option>
+                <option>最大化</option>
             </select>
             <button type="button" class="delete-param bg-red-500 text-white rounded px-3 py-1">✕</button>
         </div>`;
@@ -134,13 +134,13 @@
         })
             .then(response => {
                 if (response.ok) {
-                    alert('Задачу успішно створено!');
+                    alert('任务创建成功！');
                     window.location.href = '/tasks';
                 } else {
-                    alert('Помилка створення задачі!');
+                    alert('错误 创建 任务!');
                 }
             })
-            .catch(error => console.error('Помилка при створенні:', error));
+            .catch(error => console.error('错误 при 创建时:', error));
     });
 
     // Видалення параметра
@@ -154,8 +154,8 @@
     attachDeleteHandlers();
     function getOptDir(block) {
         const dir = block.querySelector('.opt-dir').value;
-        if (dir === 'Мінімізація') return 'MINIMIZE';
-        if (dir === 'Максимізація') return 'MAXIMIZE';
+        if (dir === '最小化') return 'MINIMIZE';
+        if (dir === '最大化') return 'MAXIMIZE';
         if (dir === 'MINIMIZE') return 'MINIMIZE';
         if (dir === 'MAXIMIZE') return 'MAXIMIZE';
         return null;

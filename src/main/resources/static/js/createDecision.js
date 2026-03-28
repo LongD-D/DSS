@@ -9,13 +9,13 @@ document.getElementById('add-scenario').addEventListener('click', () => {
     scenarioBlock.className = 'bg-gray-50 p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-3 scenario-block';
 
     scenarioBlock.innerHTML = `
-        <input type="text" placeholder="Назва сценарію" class="scenario-title flex-1 border rounded px-2 py-1" />
-        <input type="text" placeholder="Опис сценарію" class="scenario-description flex-1 border rounded px-2 py-1" />
-        <input type="number" step="0.01" min="0" max="1" placeholder="Ймовірність (0-1)" class="scenario-possibility w-32 border rounded px-2 py-1" />
+        <input type="text" placeholder="情景名称" class="scenario-title flex-1 border rounded px-2 py-1" />
+        <input type="text" placeholder="情景描述" class="scenario-description flex-1 border rounded px-2 py-1" />
+        <input type="number" step="0.01" min="0" max="1" placeholder="概率 (0-1)" class="scenario-possibility w-32 border rounded px-2 py-1" />
         <button type="button" class="remove-scenario bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">X</button>
     `;
 
-    // Видалити сценарій
+    // 删除 сценарій
     scenarioBlock.querySelector('.remove-scenario').addEventListener('click', () => {
         scenarioBlock.remove();
     });
@@ -69,11 +69,11 @@ document.getElementById('create-decision-form').addEventListener('submit', funct
     })
         .then(response => {
             if (response.ok) {
-                alert('Рішення успішно створено!');
+                alert('方案 成功 створено!');
                 window.location.href = '/tasks/' + taskId;
             } else {
-                alert('Помилка створення рішення!');
+                alert('错误 创建 方案!');
             }
         })
-        .catch(error => console.error('Помилка:', error));
+        .catch(error => console.error('错误:', error));
 });

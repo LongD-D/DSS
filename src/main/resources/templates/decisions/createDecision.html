@@ -2,66 +2,66 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Створити рішення</title>
+    <title>创建方案</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS Система</a>
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">Задачі</a>
-            <a href="/decisions" class="hover:text-blue-600">Рішення</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">Ролі</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">Користувачі</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">Вхід</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">Вийти</a>
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">方案</a>
+            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
         </nav>
     </div>
 </header>
 
 <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-center">Створити рішення до задачі</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">创建方案 до 任务</h1>
 
-    <!-- Інформація про задачу -->
+    <!-- 任务信息 -->
     <div id="task-info" class="mb-8 p-6 bg-gray-50 rounded-lg shadow">
-        <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">Інформація про задачу</h2>
+        <h2 class="text-2xl font-bold mb-4 text-center text-gray-800">任务信息</h2>
 
         <div class="space-y-2">
             <p class="text-lg text-gray-700">
-                <strong class="text-gray-900">Назва:</strong> <span id="task-title" class="text-blue-600 font-semibold" th:text="${task.title}"></span>
+                <strong class="text-gray-900">名称：</strong> <span id="task-title" class="text-blue-600 font-semibold" th:text="${task.title}"></span>
             </p>
             <p class="text-lg text-gray-700">
-                <strong class="text-gray-900">Опис:</strong> <span id="task-description" th:text="${task.description}"></span>
+                <strong class="text-gray-900">描述：</strong> <span id="task-description" th:text="${task.description}"></span>
             </p>
             <p class="text-lg text-gray-700">
-                <strong class="text-gray-900">Категорія:</strong> <span id="task-category" th:text="${task.category.label}"></span>
+                <strong class="text-gray-900">类别：</strong> <span id="task-category" th:text="${task.category.label}"></span>
             </p>
             <p class="text-lg text-gray-700">
-                <strong class="text-gray-900">Статус:</strong> <span id="task-category" th:text="${task.status.label}"></span>
+                <strong class="text-gray-900">状态：</strong> <span id="task-category" th:text="${task.status.label}"></span>
             </p>
         </div>
 
     </div>
 
-    <!-- Форма створення рішення -->
+    <!-- Форма 创建 方案 -->
     <form id="create-decision-form" class="space-y-6">
 
-        <!-- Nsme рішення -->
+        <!-- Nsme 方案 -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">Ім'я рішення</label>
-            <textarea id="title" class="w-full border rounded px-4 py-2" rows="4" placeholder="Введіть ім'я рішення"></textarea>
+            <label class="block text-gray-700 font-semibold mb-2" for="description">Ім'я 方案</label>
+            <textarea id="title" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入 ім'я 方案"></textarea>
         </div>
-        <!-- Опис рішення -->
+        <!-- 描述 方案 -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">Опис рішення</label>
-            <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="Введіть опис рішення"></textarea>
+            <label class="block text-gray-700 font-semibold mb-2" for="description">描述 方案</label>
+            <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入描述 方案"></textarea>
         </div>
 
-        <!-- Параметри рішення -->
+        <!-- 参数и 方案 -->
         <div class="mt-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Параметри рішення</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">参数и 方案</h3>
             <div id="parameters-container" class="space-y-4">
                 <div th:each="parameter : ${task.taskParameters}" class="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-3 parameter-block">
                     <div class="flex-1 min-w-[200px]">
@@ -73,28 +73,28 @@
                     <div class="w-28">
                         <p class="text-gray-600 text-center" th:text="${parameter.unit}"></p>
                     </div>
-                    <input type="number" step="0.01" placeholder="Значення" class="param-value w-28 border rounded px-2 py-1" />
-                    <input type="text" placeholder="Коментар" class="param-comment flex-1 border rounded px-2 py-1" />
+                    <input type="number" step="0.01" placeholder="值" class="param-value w-28 border rounded px-2 py-1" />
+                    <input type="text" placeholder="评论" class="param-comment flex-1 border rounded px-2 py-1" />
                     <input type="hidden" class="task-parameter-id" th:value="${parameter.id}" />
                 </div>
             </div>
         </div>
 
-        <!-- Сценарії рішення -->
+        <!-- 情景 方案 -->
         <div class="mt-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Сценарії рішення</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">情景 方案</h3>
             <div id="scenarios-container" class="space-y-4">
                 <!-- Тут будуть сценарії -->
             </div>
             <button type="button" id="add-scenario" class="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg">
-                Додати сценарій
+                添加情景
             </button>
         </div>
 
-        <!-- Кнопка створення -->
+        <!-- Кнопка 创建 -->
         <div class="flex justify-center mt-8">
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">
-                Створити рішення
+                创建方案
             </button>
         </div>
 
