@@ -3,7 +3,7 @@ const urlParts = window.location.pathname.split('/');
 const taskId = urlParts[urlParts.length - 1];
 const taskCategory = document.querySelector('.task-category').textContent;
 
-// Дані про параметри задачі
+// Дані про 参数 任务
 const taskParametersTable = document.getElementById('task-parameters-table');
 const taskParameters = Array.from(taskParametersTable.querySelectorAll('tbody tr')).map(row => ({
     name: row.children[0].innerText.trim(),
@@ -34,7 +34,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
             const createButton = document.createElement('a');
             createButton.href = `/decisions/create?taskId=${taskId}`;
             createButton.className = "inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4";
-            createButton.textContent = "Запропонувати рішення";
+            createButton.textContent = "提交方案";
 
             document.getElementById('create-decision-container').appendChild(createButton);
         }
@@ -42,7 +42,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         if (isAnalyst) {
             const ahpButton = document.createElement('button');
             ahpButton.className = "inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            ahpButton.textContent = "Обрати найкраще рішення (AHP)";
+            ahpButton.textContent = "选择最佳方案 (AHP)";
             ahpButton.onclick = openAHPModal;
 
             document.getElementById('create-decision-container').appendChild(ahpButton);
@@ -51,7 +51,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         if (isAnalyst) {
             const topsisButton = document.createElement('button');
             topsisButton.className = "inline-block bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            topsisButton.textContent = "Обрати найкраще рішення (TOPSIS)";
+            topsisButton.textContent = "选择最佳方案 (TOPSIS)";
             topsisButton.onclick = calculateTopsis;
 
             document.getElementById('create-decision-container').appendChild(topsisButton);
@@ -59,7 +59,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         if (isAnalyst) {
             const electreButton = document.createElement('button');
             electreButton.className = "inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            electreButton.textContent = "Обрати найкраще рішення (ELECTRE)";
+            electreButton.textContent = "选择最佳方案 (ELECTRE)";
             electreButton.onclick = () => {
                 document.getElementById('electre-modal').classList.remove('hidden');
             };
@@ -68,19 +68,19 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         if (isAnalyst) {
             const recommendButton = document.createElement('button');
             recommendButton.className = "inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            recommendButton.textContent = "Переглянути рекомендований метод";
+            recommendButton.textContent = "查看推荐方法";
             recommendButton.onclick = recommendMethod;
 
             document.getElementById('create-decision-container').appendChild(recommendButton);
         }
-        // Створення кнопки "Оцінити" і передача ID
+        // Створення кнопки "评分" і передача ID
         if (userRole === 'ECOLOGIST' || userRole === 'ECONOMIST' || userRole === 'POWER_ENGINEER' || userRole === 'LAWEYR') {
             document.querySelectorAll('[data-decision-id]').forEach(decisionCard => {
                 const decisionId = decisionCard.getAttribute('data-decision-id');
 
                 const rateButton = document.createElement('button');
                 rateButton.className = "inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2";
-                rateButton.textContent = "Оцінити";
+                rateButton.textContent = "评分";
 
                 // ЦЕ ГОЛОВНЕ: передаємо ID у функцію
                 rateButton.onclick = () => openRateModal(decisionId);
@@ -98,16 +98,16 @@ fetch('http://localhost:8080/api/v1/auth/user', {
                 const editButton = document.createElement('a');
                 editButton.href = `/decisions/${decisionId}/edit`;
                 editButton.className = "inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2";
-                editButton.textContent = "Редагувати рішення";
+                editButton.textContent = "编辑 方案";
 
                 decisionCard.appendChild(editButton);
             }
         });
     })
     .catch(error => {
-        alert("Вам необхідно авторизуватися.")
+        alert("您需要先登录。")
         window.location.href = "/login";
-        console.error('Помилка отримання користувача:', error);
+        console.error('错误 获取 用户:', error);
     });
 
 // Відкрити модалку для введення матриці AHP
@@ -146,12 +146,12 @@ function openAHPModal() {
     modal.classList.remove('hidden');
 }
 
-// Закрити модалку без обчислення
+// 关闭 модалку без обчислення
 document.getElementById('cancel-ahp').addEventListener('click', () => {
     document.getElementById('ahp-modal').classList.add('hidden');
 });
 
-// Обробка кнопки "Обчислити" в модалці
+// Обробка кнопки "计算" в модалці
 document.getElementById('submit-ahp').addEventListener('click', () => {
     const size = taskParameters.length;
     const matrix = [];
@@ -164,7 +164,7 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
         }
     }
 
-    console.log('Матриця парних порівнянь:', matrix);
+    console.log('两两比较矩阵：', matrix);
 
     fetch(`http://localhost:8080/api/v1/tasks/${taskId}/ahp`, {
         method: 'POST',
@@ -180,10 +180,10 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
             resultModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
             resultModal.innerHTML = `
             <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-                <h2 class="text-2xl font-bold mb-6 text-center">Результати вибору (AHP)</h2>
+                <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (AHP)</h2>
                 <table class="w-full border text-sm mb-6">
                     <thead class="bg-gray-200">
-                        <tr><th class="p-2 border">Рішення</th><th class="p-2 border">Оцінка</th></tr>
+                        <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
                     </thead>
                     <tbody>
                         ${
@@ -200,7 +200,7 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
                 </table>
                 <div class="flex justify-center">
                     <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" id="close-result-modal">
-                        Закрити
+                        关闭
                     </button>
                 </div>
             </div>
@@ -214,8 +214,8 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
             document.getElementById('ahp-modal').classList.add('hidden');
         })
         .catch(error => {
-            console.error('Помилка при обчисленні AHP:', error);
-            alert('Не вдалося визначити результати вибору.');
+            console.error('错误 при обчисленні AHP:', error);
+            alert('无法确定选择结果。');
             document.getElementById('ahp-modal').classList.add('hidden');
         });
 });
@@ -238,10 +238,10 @@ function calculateTopsis() {
 
             modal.innerHTML = `
             <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-                <h2 class="text-2xl font-bold mb-6 text-center">Результати вибору (TOPSIS)</h2>
+                <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (TOPSIS)</h2>
                 <table class="w-full border text-sm mb-6">
                     <thead class="bg-gray-200">
-                        <tr><th class="p-2 border">Рішення</th><th class="p-2 border">Оцінка</th></tr>
+                        <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
                     </thead>
                     <tbody>
                         ${sorted.map(([desc, score], i) => `
@@ -253,7 +253,7 @@ function calculateTopsis() {
                     </tbody>
                 </table>
                 <div class="flex justify-center">
-                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">Закрити</button>
+                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
                 </div>
             </div>
         `;
@@ -261,8 +261,8 @@ function calculateTopsis() {
             document.body.appendChild(modal);
         })
         .catch(error => {
-            console.error('TOPSIS помилка:', error);
-            alert('Не вдалося визначити найкраще рішення (TOPSIS).');
+            console.error('TOPSIS 错误：', error);
+            alert('无法确定最佳方案 (TOPSIS)。');
         });
 }
 
@@ -284,10 +284,10 @@ function calculateElectre() {
 
             modal.innerHTML = `
                 <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-                    <h2 class="text-2xl font-bold mb-6 text-center">Результати вибору (ELECTRE)</h2>
+                    <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (ELECTRE)</h2>
                     <table class="w-full border text-sm mb-6">
                         <thead class="bg-gray-200">
-                            <tr><th class="p-2 border">Рішення</th><th class="p-2 border">Оцінка</th></tr>
+                            <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
                         </thead>
                         <tbody>
                             ${sorted.map(([desc, score], i) => `
@@ -299,7 +299,7 @@ function calculateElectre() {
                         </tbody>
                     </table>
                     <div class="flex justify-center">
-                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">Закрити</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
                     </div>
                 </div>
             `;
@@ -307,8 +307,8 @@ function calculateElectre() {
             document.body.appendChild(modal);
         })
         .catch(error => {
-            console.error('ELECTRE помилка:', error);
-            alert('Не вдалося визначити найкраще рішення (ELECTRE).');
+            console.error('ELECTRE 错误：', error);
+            alert('无法确定最佳方案 (ELECTRE)。');
         });
 }
 
@@ -317,16 +317,16 @@ function openElectreModal() {
     modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
     modal.innerHTML = `
         <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 class="text-xl font-bold mb-4 text-center">Введіть пороги ELECTRE</h2>
-            <label class="block mb-2">Поріг узгодження (C):</label>
+            <h2 class="text-xl font-bold mb-4 text-center">请输入 ELECTRE 阈值</h2>
+            <label class="block mb-2">一致性阈值 (C)：</label>
             <input id="c-threshold" type="number" step="0.01" min="0" max="1" value="0.5"
                    class="w-full p-2 border rounded mb-4" />
-            <label class="block mb-2">Поріг неузгодження (D):</label>
+            <label class="block mb-2">不一致性阈值 (D)：</label>
             <input id="d-threshold" type="number" step="0.01" min="0" max="1" value="0.5"
                    class="w-full p-2 border rounded mb-6" />
             <div class="flex justify-end space-x-2">
-                <button class="bg-gray-300 px-4 py-2 rounded" onclick="this.closest('.fixed').remove()">Скасувати</button>
-                <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="submitElectre()">Обчислити</button>
+                <button class="bg-gray-300 px-4 py-2 rounded" onclick="this.closest('.fixed').remove()">取消</button>
+                <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="submitElectre()">计算</button>
             </div>
         </div>
     `;
@@ -365,10 +365,10 @@ function submitElectre() {
             modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
             modal.innerHTML = `
                 <div class="bg-white p-6 rounded shadow-lg max-w-2xl w-full">
-                    <h2 class="text-xl font-bold mb-4 text-center">Результати вибору (ELECTRE)</h2>
+                    <h2 class="text-xl font-bold mb-4 text-center">选择结果 (ELECTRE)</h2>
                     <table class="w-full border text-sm mb-4">
                         <thead class="bg-gray-200">
-                            <tr><th class="p-2 border">Рішення</th><th class="p-2 border">Оцінка</th></tr>
+                            <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
                         </thead>
                         <tbody>
                             ${sorted.map(([desc, score]) => `
@@ -380,25 +380,25 @@ function submitElectre() {
                         </tbody>
                     </table>
                     <div class="flex justify-center">
-                        <button onclick="this.closest('.fixed').remove()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Закрити</button>
+                        <button onclick="this.closest('.fixed').remove()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">关闭</button>
                     </div>
                 </div>`;
             document.body.appendChild(modal);
             closeElectreModal();
         })
         .catch(error => {
-            console.error('ELECTRE помилка:', error);
-            alert('Не вдалося обчислити ELECTRE.');
+            console.error('ELECTRE 错误：', error);
+            alert('无法计算 ELECTRE。');
             closeElectreModal();
         });
 }
-// Сортуємо рішення по категорії
+// Сортуємо 方案 по категорії
 decisions.sort((a, b) => {
     const order = ['APPROVED', 'PROPOSED', 'REJECTED'];
     return order.indexOf(a.decisionStatus) - order.indexOf(b.decisionStatus);
 });
 
-// Рендеримо рішення
+// Рендеримо 方案
 const container = document.getElementById('decisions-container');
 container.innerHTML = '';
 
@@ -407,16 +407,16 @@ decisions.forEach(decision => {
         <a href="/decisions/${decision.id}" class="bg-white p-4 rounded-lg shadow block" data-decision-id="${decision.id}" data-decision-user-id="${decision.user.id}">
             <h3 class="text-xl font-bold mb-2">${decision.title}</h3>
             <p class="text-gray-600 mb-2">
-                <strong>Опис:</strong> ${decision.description} |
-                <strong>Тип:</strong> ${decision.decisionCategory} |
-                <strong>Статус:</strong> ${decision.decisionStatus}
+                <strong>描述：</strong> ${decision.description} |
+                <strong>类型：</strong> ${decision.decisionCategory} |
+                <strong>状态：</strong> ${decision.decisionStatus}
             </p>
             <p class="text-gray-700 mb-4">
-                <strong>Автор:</strong> ${decision.user.name} (${decision.user.roles[0].name})
+                <strong>作者：</strong> ${decision.user.name} (${decision.user.roles[0].name})
             </p>
             <p class="text-gray-600 mb-2">
-                <strong>Рейтинг:</strong> ${decision.rate.toFixed(2)}/10<br>
-                <strong>Кількість оцінок:</strong> ${decision.expertEvaluations.length}
+                <strong>评分：</strong> ${decision.rate.toFixed(2)}/10<br>
+                <strong>评分数量：</strong> ${decision.expertEvaluations.length}
             </p>
         </a>
     `;
@@ -435,18 +435,18 @@ function recommendMethod() {
             modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
             modal.innerHTML = `
                 <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-                    <h2 class="text-2xl font-bold mb-4">Рекомендований метод</h2>
-                    <p class="text-lg mb-6">На основі характеристики задачі рекомендовано використати метод:</p>
+                    <h2 class="text-2xl font-bold mb-4">推荐方法</h2>
+                    <p class="text-lg mb-6">基于任务特征，推荐使用以下方法：</p>
                     <p class="text-3xl font-extrabold text-blue-600">${method}</p>
                     <div class="mt-6">
-                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">Закрити</button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         })
         .catch(error => {
-            console.error('Помилка рекомендації методу:', error);
-            alert('Не вдалося отримати рекомендацію.');
+            console.error('错误 рекомендації методу:', error);
+            alert('无法获取推荐。');
         });
 }

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Управління Ролями</title>
+    <title>角色管理</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="p-4">
@@ -46,13 +46,13 @@
         .then(user => {
             const roles = user.roles.map(r => r.name);
             if (!roles.includes('ROLE_ADMIN')) {
-                alert('У вас немає прав доступу до цієї сторінки.');
+                alert('您没有权限访问此页面。');
                 window.location.href = '/';
             } else {
                 document.getElementById('admin-role-section').style.display = 'block';
                 if (isEdit && roleId) {
-                    document.getElementById('form-title').textContent = 'Редагувати роль';
-                    document.getElementById('submit-button').textContent = 'Оновити';
+                    document.getElementById('form-title').textContent = '编辑角色';
+                    document.getElementById('submit-button').textContent = '更新';
 
                     fetch(`/api/v1/roles/${roleId}`, {
                         method: 'GET',
@@ -82,7 +82,7 @@
         })
             .then(res => {
                 if (res.ok) {
-                    alert('Роль збережено!');
+                    alert('角色已保存！');
                     window.location.href = '/users';
                 } else {
                     return res.text().then(text => { throw new Error(text); });
@@ -90,7 +90,7 @@
             })
             .catch(err => {
                 console.error(err);
-                alert('Помилка при збереженні ролі');
+                alert('错误 при 保存时 角色');
             });
     });
 </script>

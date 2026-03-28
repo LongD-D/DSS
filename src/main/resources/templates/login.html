@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Вхід в систему</title>
+    <title>登录 в систему</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
@@ -51,11 +51,11 @@
                 localStorage.setItem('token', data.token);
                 window.location.href = 'tasks'; // редірект після входу
             } else {
-                errorMessage.textContent = 'Невірний email або пароль';
+                errorMessage.textContent = '邮箱或密码错误';
                 errorMessage.classList.remove('hidden');
             }
         } catch (error) {
-            errorMessage.textContent = 'Помилка сервера. Спробуйте пізніше';
+            errorMessage.textContent = '错误 сервера. Спробуйте пізніше';
             errorMessage.classList.remove('hidden');
         }
     });

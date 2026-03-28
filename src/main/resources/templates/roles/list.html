@@ -2,7 +2,7 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Управління ролями</title>
+    <title>角色管理</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6 min-h-screen">
@@ -10,7 +10,7 @@
     <h1 class="text-2xl font-bold mb-4 text-center">角色列表</h1>
 
     <form id="create-role-form" class="flex gap-4 mb-6">
-        <input type="text" id="role-name" placeholder="Нова роль (наприклад: ROLE_USER)"
+        <input type="text" id="role-name" placeholder="新角色（例如：ROLE_USER）"
                class="flex-1 border px-4 py-2 rounded" required>
         <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
             ➕ 添加
@@ -18,7 +18,7 @@
     </form>
 
     <ul id="role-list" class="space-y-3">
-        <!-- Динамічний список ролей -->
+        <!-- Динамічний список 角色 -->
     </ul>
 </div>
 
@@ -53,7 +53,7 @@
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.onclick = () => {
                 const id = btn.getAttribute('data-id');
-                if (confirm('Видалити роль?')) {
+                if (confirm('删除角色？')) {
                     fetch(`/api/v1/roles/${id}`, {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
@@ -66,7 +66,7 @@
             btn.onclick = () => {
                 const id = btn.getAttribute('data-id');
                 const currentName = btn.getAttribute('data-name');
-                const newName = prompt('Нове імʼя ролі:', currentName);
+                const newName = prompt('角色新名称：', currentName);
                 if (newName && newName !== currentName) {
                     fetch(`/api/v1/roles/${id}`, {
                         method: 'PUT',

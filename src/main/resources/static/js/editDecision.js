@@ -31,9 +31,9 @@ function addScenario() {
     scenarioBlock.className = 'bg-gray-50 p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-3 scenario-block mt-2';
 
     scenarioBlock.innerHTML = `
-        <input type="text" class="scenario-title w-1/3 border rounded px-2 py-1" placeholder="Назва сценарію">
-        <input type="text" class="scenario-description w-1/3 border rounded px-2 py-1" placeholder="Опис">
-        <input type="number" step="0.01" min="0" max="1" class="scenario-possibility w-28 border rounded px-2 py-1" placeholder="Ймовірність">
+        <input type="text" class="scenario-title w-1/3 border rounded px-2 py-1" placeholder="情景名称">
+        <input type="text" class="scenario-description w-1/3 border rounded px-2 py-1" placeholder="描述">
+        <input type="number" step="0.01" min="0" max="1" class="scenario-possibility w-28 border rounded px-2 py-1" placeholder="概率">
         <button type="button" class="remove-scenario bg-red-500 hover:bg-red-600 text-white py-1 px-3 rounded">✕</button>
     `;
 
@@ -50,7 +50,7 @@ function attachRemoveScenarioListeners() {
     });
 }
 
-// Зберегти рішення
+// 保存 方案
 function saveDecision() {
     const title = document.getElementById('title').value;
     const description = document.getElementById('description').value;
@@ -91,13 +91,13 @@ function saveDecision() {
             if (response.ok) {
                 window.history.back();
             } else {
-                alert('Помилка при оновленні рішення!');
+                alert('错误 при 更新时 方案!');
             }
         })
-        .catch(error => console.error('Помилка при оновленні:', error));
+        .catch(error => console.error('错误 при 更新时:', error));
 }
 
-// Видалити рішення
+// 删除 方案
 function deleteDecision() {
     fetch(`http://localhost:8080/api/v1/decisions/${decisionId}`, {
         method: 'DELETE',
@@ -110,19 +110,19 @@ function deleteDecision() {
             if (response.ok) {
                 window.location.href = '/tasks';
             } else {
-                alert('Помилка при видаленні рішення!');
+                alert('错误 при 删除时 方案!');
             }
         })
-        .catch(error => console.error('Помилка при видаленні:', error));
+        .catch(error => console.error('错误 при 删除时:', error));
 }
 
 // Обробники кнопок
 document.getElementById('add-scenario').addEventListener('click', addScenario);
 document.getElementById('save-decision').addEventListener('click', () => {
-    showModal("Підтвердити збереження", "Ви впевнені, що хочете зберегти зміни?", saveDecision);
+    showModal("确认 збереження", "您确定要保存更改吗？", saveDecision);
 });
 document.getElementById('delete-decision').addEventListener('click', () => {
-    showModal("Підтвердити видалення", "Ви точно хочете видалити рішення?", deleteDecision);
+    showModal("确认 видалення", "您确定要删除该方案吗？", deleteDecision);
 });
 
 // Підключити обробники для існуючих сценаріїв при завантаженні

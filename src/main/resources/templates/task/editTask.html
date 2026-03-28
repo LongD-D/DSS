@@ -54,15 +54,15 @@
             </select>
         </div>
 
-        <!-- Параметри -->
+        <!-- 参数и -->
         <div>
             <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
                 <div th:each="parameter : ${task.taskParameters}" class="border p-4 rounded bg-gray-50 parameter-block relative">
                     <div class="flex gap-4">
-                        <input type="text" class="param-name w-1/3 border rounded px-2 py-1" th:value="${parameter.name}" placeholder="Назва">
-                        <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" th:value="${parameter.weight}" placeholder="Вага">
-                        <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" th:value="${parameter.unit}" placeholder="Одиниця виміру">
+                        <input type="text" class="param-name w-1/3 border rounded px-2 py-1" th:value="${parameter.name}" placeholder="名称">
+                        <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" th:value="${parameter.weight}" placeholder="权重">
+                        <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" th:value="${parameter.unit}" placeholder="单位 виміру">
                         <select name="optimizationDirection" id="optimizationDirection">
                             <option th:each="dir : ${T(dss.model.entity.enums.OptimizationDirection).values()}"
                                     th:value="${dir}"
@@ -101,12 +101,12 @@
         paramBlock.className = 'border p-4 rounded bg-gray-50 parameter-block relative mt-2';
         paramBlock.innerHTML = `
         <div class="flex gap-4">
-            <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="Назва">
-            <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="Вага">
-            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="Одиниця виміру">
+            <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="名称">
+            <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="权重">
+            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 виміру">
             <select id="optimizationDirection" class="w-full border rounded px-4 py-2">
-                <option>Максимізація</option>
-                <option>Мінімізація</option>
+                <option>最大化</option>
+                <option>最小化</option>
             </select>
             <button type="button" class="delete-param bg-red-500 text-white rounded px-3 py-1">✕</button>
         </div>`;
@@ -125,10 +125,10 @@
         function getOptDir(block){
             let optimizationDirection;
 
-            if (block.querySelector('#optimizationDirection').value === 'Мінімізація'){
+            if (block.querySelector('#optimizationDirection').value === '最小化'){
                 optimizationDirection = 'MINIMIZE';
             }
-            else if (block.querySelector('#optimizationDirection').value === 'Максимізація'){
+            else if (block.querySelector('#optimizationDirection').value === '最大化'){
                 optimizationDirection = 'MAXIMIZE';
             }
             else if (block.querySelector('#optimizationDirection').value === 'MINIMIZE'){
@@ -172,13 +172,13 @@
         })
             .then(response => {
                 if (response.ok) {
-                    alert('Задачу успішно оновлено!');
-                    window.location.href = '/tasks/'+taskId; // Повертаємося на список задач
+                    alert('任务更新成功！');
+                    window.location.href = '/tasks/'+taskId; // Повертаємося на список 任务
                 } else {
-                    alert('Помилка оновлення задачі!');
+                    alert('错误 оновлення 任务!');
                 }
             })
-            .catch(error => console.error('Помилка при оновленні:', error));
+            .catch(error => console.error('错误 при 更新时:', error));
     });
     // Видалення параметра
     function attachDeleteHandlers() {
