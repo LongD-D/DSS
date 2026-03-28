@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>问卷结果分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+<header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
+
+        <nav class="flex items-center gap-6 text-gray-700 font-semibold">
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/questionnaire" class="text-blue-600">问卷</a>
+            <a href="/login" class="hover:text-blue-600">登录</a>
+        </nav>
+    </div>
+</header>
+
+<div class="max-w-5xl mx-auto pt-24 space-y-6">
+    <div class="bg-white rounded-xl shadow p-6">
+        <h1 class="text-3xl font-bold text-center">问卷结果分析</h1>
+        <p class="text-center text-gray-600 mt-2">本次问卷已完成提交，以下为自动统计结果。</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">总体评分</h2>
+            <p class="text-4xl font-bold text-blue-600" th:text="${#numbers.formatDecimal(overallAverage, 1, 2)}"></p>
+            <p class="text-gray-500 mt-2">满分 5 分</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">分维度均分</h2>
+            <ul class="space-y-2">
+                <li th:each="entry : ${dimensionAverage}" class="flex justify-between border-b pb-2">
+                    <span th:text="${entry.key}"></span>
+                    <strong th:text="${#numbers.formatDecimal(entry.value, 1, 2)}"></strong>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">题目明细</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="bg-gray-100">
+                    <th class="p-3">维度</th>
+                    <th class="p-3">题目</th>
+                    <th class="p-3">评分</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="answer : ${answers}" class="border-b">
+                    <td class="p-3" th:text="${answer.dimension}"></td>
+                    <td class="p-3" th:text="${answer.questionText}"></td>
+                    <td class="p-3 font-semibold" th:text="${answer.score}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="flex justify-center">
+        <a href="/questionnaire" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition">
+            再来一轮随机问卷
+        </a>
+    </div>
+</div>
+</body>
+</html>
