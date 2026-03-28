@@ -134,8 +134,8 @@
     const token = localStorage.getItem('token');
 
     if (token) {
-        document.getElementById('nav-login')?.classList.add('hidden');
-        document.getElementById('nav-logout')?.classList.remove('hidden');
+        document.getElementById('login-link')?.classList.add('hidden');
+        document.getElementById('logout-link')?.classList.remove('hidden');
 
         fetch('/api/v1/auth/user', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -144,8 +144,8 @@
             .then(user => {
                 const roles = user.roles.map(r => r.name);
                 if (roles.includes('ROLE_ADMIN')) {
-                    document.getElementById('nav-role')?.classList.remove('hidden');
-                    document.getElementById('nav-users')?.classList.remove('hidden');
+                    document.getElementById('role-link')?.classList.remove('hidden');
+                    document.getElementById('users-link')?.classList.remove('hidden');
                 }
             })
             .catch(() => {
@@ -154,7 +154,7 @@
             });
     }
 
-    document.getElementById('nav-logout')?.addEventListener('click', () => {
+    document.getElementById('logout-link')?.addEventListener('click', () => {
         localStorage.removeItem('token');
         window.location.href = '/login';
     });
