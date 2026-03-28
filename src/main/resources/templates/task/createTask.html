@@ -56,7 +56,7 @@
         <div>
             <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
-                <!-- Тут будуть 参数 -->
+                <!-- 这里将显示参数 -->
             </div>
             <button type="button" id="add-param" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
                 添加参数
@@ -74,7 +74,7 @@
 <script>
     const token = localStorage.getItem('token');
 
-    // Додати новий параметр
+    // 添加新参数
     document.getElementById('add-param').addEventListener('click', () => {
         const container = document.getElementById('parameters-container');
         const paramBlock = document.createElement('div');
@@ -83,7 +83,7 @@
         <div class="flex gap-4">
             <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="名称">
             <input type="number" step="0.1" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="权重">
-            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 виміру">
+            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 单位">
             <select id="opt-dir" class="opt-dir w-full border rounded px-4 py-2">
                 <option>最小化</option>
                 <option>最大化</option>
@@ -94,7 +94,7 @@
         attachDeleteHandlers();
     });
 
-    // Сабміт форми
+    // 提交表单
     document.getElementById('create-task-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
@@ -140,10 +140,10 @@
                     alert('错误 创建 任务!');
                 }
             })
-            .catch(error => console.error('错误 при 创建时:', error));
+            .catch(error => console.error('错误： 创建时:', error));
     });
 
-    // Видалення параметра
+    // 删除参数
     function attachDeleteHandlers() {
         document.querySelectorAll('.delete-param').forEach(button => {
             button.addEventListener('click', (e) => {

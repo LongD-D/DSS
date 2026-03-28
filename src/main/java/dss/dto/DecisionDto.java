@@ -18,13 +18,13 @@ import java.util.List;
 public class DecisionDto {
 
 
-    @NotNull(message = "Тип рішення не може бути null")
+    @NotNull(message = "方案类型不能为空")
     private DecisionCategory decisionCategory;
 
     @NotBlank
     private String title;
 
-    @NotBlank(message = "Опис рішення не може бути порожнім")
+    @NotBlank(message = "方案描述不能为空")
     private String description;
 
     @NotNull

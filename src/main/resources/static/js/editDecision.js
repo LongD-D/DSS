@@ -1,14 +1,14 @@
 const token = localStorage.getItem('token');
 const decisionId = document.getElementById('decisionId').value;
 
-// Модальне вікно
+// 弹窗
 const modal = document.getElementById('confirm-modal');
 const modalTitle = document.getElementById('modal-title');
 const modalMessage = document.getElementById('modal-message');
 const modalConfirm = document.getElementById('modal-confirm');
 const modalCancel = document.getElementById('modal-cancel');
 
-// Показати модальне вікно
+// 显示弹窗
 function showModal(title, message, confirmAction) {
     modalTitle.innerText = title;
     modalMessage.innerText = message;
@@ -24,7 +24,7 @@ function showModal(title, message, confirmAction) {
     };
 }
 
-// Додати новий сценарій
+// 添加新场景
 function addScenario() {
     const container = document.getElementById('scenarios-container');
     const scenarioBlock = document.createElement('div');
@@ -41,7 +41,7 @@ function addScenario() {
     attachRemoveScenarioListeners();
 }
 
-// Прив'язати обробник видалення сценарію
+// 绑定删除场景处理器
 function attachRemoveScenarioListeners() {
     document.querySelectorAll('.remove-scenario').forEach(button => {
         button.onclick = function () {
@@ -91,10 +91,10 @@ function saveDecision() {
             if (response.ok) {
                 window.history.back();
             } else {
-                alert('错误 при 更新时 方案!');
+                alert('错误： 更新时 方案!');
             }
         })
-        .catch(error => console.error('错误 при 更新时:', error));
+        .catch(error => console.error('错误： 更新时:', error));
 }
 
 // 删除 方案
@@ -110,20 +110,20 @@ function deleteDecision() {
             if (response.ok) {
                 window.location.href = '/tasks';
             } else {
-                alert('错误 при 删除时 方案!');
+                alert('错误： 删除时 方案!');
             }
         })
-        .catch(error => console.error('错误 при 删除时:', error));
+        .catch(error => console.error('错误： 删除时:', error));
 }
 
-// Обробники кнопок
+// 按钮处理器
 document.getElementById('add-scenario').addEventListener('click', addScenario);
 document.getElementById('save-decision').addEventListener('click', () => {
-    showModal("确认 збереження", "您确定要保存更改吗？", saveDecision);
+    showModal("确认 保存", "您确定要保存更改吗？", saveDecision);
 });
 document.getElementById('delete-decision').addEventListener('click', () => {
-    showModal("确认 видалення", "您确定要删除该方案吗？", deleteDecision);
+    showModal("确认 删除", "您确定要删除该方案吗？", deleteDecision);
 });
 
-// Підключити обробники для існуючих сценаріїв при завантаженні
+// 加载时为现有场景绑定处理器
 attachRemoveScenarioListeners();

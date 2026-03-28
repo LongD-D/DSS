@@ -2,7 +2,7 @@ const token = localStorage.getItem('token');
 const urlParams = new URLSearchParams(window.location.search);
 const taskId = urlParams.get('taskId');
 
-// Додаємо сценарій
+// 添加场景
 document.getElementById('add-scenario').addEventListener('click', () => {
     const container = document.getElementById('scenarios-container');
     const scenarioBlock = document.createElement('div');
@@ -15,7 +15,7 @@ document.getElementById('add-scenario').addEventListener('click', () => {
         <button type="button" class="remove-scenario bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">X</button>
     `;
 
-    // 删除 сценарій
+    // 删除 场景
     scenarioBlock.querySelector('.remove-scenario').addEventListener('click', () => {
         scenarioBlock.remove();
     });
@@ -23,7 +23,7 @@ document.getElementById('add-scenario').addEventListener('click', () => {
     container.appendChild(scenarioBlock);
 });
 
-// Сабміт форми
+// 提交表单
 document.getElementById('create-decision-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -69,7 +69,7 @@ document.getElementById('create-decision-form').addEventListener('submit', funct
     })
         .then(response => {
             if (response.ok) {
-                alert('方案 成功 створено!');
+                alert('方案 成功 创建!');
                 window.location.href = '/tasks/' + taskId;
             } else {
                 alert('错误 创建 方案!');

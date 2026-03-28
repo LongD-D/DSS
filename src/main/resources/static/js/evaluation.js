@@ -27,7 +27,7 @@ function openRateModal(decisionId) {
             }
         })
         .catch(error => {
-            console.error('错误 при завантаженні попередньої оцінки:', error);
+            console.error('错误 加载历史评分时:', error);
         });
 }
 
@@ -61,7 +61,7 @@ function submitRate() {
         body: JSON.stringify({ score, comment, decisionId: selectedDecisionId })
     })
         .then(response => {
-            if (!response.ok) throw new Error('错误 при оцінюванні');
+            if (!response.ok) throw new Error('错误 评分时');
             return response.json();
         })
         .then(() => {
@@ -70,7 +70,7 @@ function submitRate() {
             location.reload();
         })
         .catch(error => {
-            console.error('错误 при 保存时 оцінки:', error);
+            console.error('错误： 保存时 评分:', error);
             alert('无法保存评分');
         });
 }

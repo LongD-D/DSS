@@ -25,7 +25,7 @@
 <div class="max-w-7xl mx-auto pt-24">
     <h1 class="text-3xl font-bold mb-8 text-center">任务列表 </h1>
 
-    <!-- Форма фільтрації -->
+    <!-- 筛选表单 -->
     <form method="get" th:action="@{/tasks}" class="mb-6 flex flex-wrap justify-center gap-4">
         <select name="category" class="border rounded px-4 py-2">
             <option value="">全部类别</option>
@@ -90,7 +90,7 @@
                 <ul class="space-y-2 hidden parameters-list">
                     <li th:each="parameter : ${task.taskParameters}" class="bg-gray-100 p-3 rounded-lg">
                         <p class="text-gray-700"><strong> 名称:</strong> <span th:text="${parameter.name}"></span></p>
-                        <p class="text-gray-700"><strong>В权重:</strong> <span th:text="${parameter.weight}"></span></p>
+                        <p class="text-gray-700"><strong>权重:</strong> <span th:text="${parameter.weight}"></span></p>
                         <p class="text-gray-700"><strong>计量单位:</strong> <span th:text="${parameter.unit}"></span></p>
                     </li>
                 </ul>
@@ -136,7 +136,7 @@
         window.location.href = '/login';
     });
 
-    // Фільтрація
+    // 筛选
     document.addEventListener('DOMContentLoaded', () => {
         const categoryFilter = document.getElementById('filter-category');
         const statusFilter = document.getElementById('filter-status');

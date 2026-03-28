@@ -91,7 +91,7 @@ public class DecisionServiceImpl implements DecisionService {
     @Transactional
     public Decision updateDecision(Long id, DecisionDto decisionDto, Authentication authentication) {
         Decision decision = decisionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Рішення не знайдено з id: " + id));
+                .orElseThrow(() -> new RuntimeException("未找到 ID 对应的方案: " + id));
 
         decision.setTitle(decisionDto.getTitle());
         decision.setDescription(decisionDto.getDescription());

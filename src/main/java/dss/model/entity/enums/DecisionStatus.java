@@ -1,9 +1,9 @@
 package dss.model.entity.enums;
 
 public enum DecisionStatus {
-    PROPOSED("Запропоновано"),
-    APPROVED("Схвалено"),
-    REJECTED("Відхилено");
+    PROPOSED("已提议"),
+    APPROVED("已批准"),
+    REJECTED("已拒绝");
 
     private final String ukrName;
 

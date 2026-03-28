@@ -35,7 +35,7 @@ public class TopsisServiceImpl implements TopsisService {
         System.out.println("--- Decision Matrix ---");
         printMatrix(decisionMatrix);
 
-        // Нормалізація
+        // 归一化
         double[][] normalizedMatrix = new double[m][n];
         for (int j = 0; j < n; j++) {
             double sumSquares = 0.0;
@@ -51,7 +51,7 @@ public class TopsisServiceImpl implements TopsisService {
         System.out.println("--- Normalized Matrix ---");
         printMatrix(normalizedMatrix);
 
-        // Зважена нормалізована матриця
+        // 加权归一化矩阵
         double[][] weightedMatrix = new double[m][n];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -62,7 +62,7 @@ public class TopsisServiceImpl implements TopsisService {
         System.out.println("--- Weighted Matrix ---");
         printMatrix(weightedMatrix);
 
-        // Ідеальне та антиідеальне рішення з урахуванням OptimizationDirection
+        // 根据 OptimizationDirection 计算理想解与负理想解
         double[] ideal = new double[n];
         double[] antiIdeal = new double[n];
         for (int j = 0; j < n; j++) {
@@ -81,7 +81,7 @@ public class TopsisServiceImpl implements TopsisService {
             }
         }
 
-        // Відстані
+        // 距离
         double[] distanceToIdeal = new double[m];
         double[] distanceToAntiIdeal = new double[m];
         for (int i = 0; i < m; i++) {
@@ -94,7 +94,7 @@ public class TopsisServiceImpl implements TopsisService {
             distanceToAntiIdeal[i] = Math.sqrt(dMinus);
         }
 
-        // Коефіцієнти близькості
+        // 贴近系数
         Map<String, Double> result = new LinkedHashMap<>();
         for (int i = 0; i < m; i++) {
             double closeness = distanceToAntiIdeal[i] / (distanceToIdeal[i] + distanceToAntiIdeal[i]);

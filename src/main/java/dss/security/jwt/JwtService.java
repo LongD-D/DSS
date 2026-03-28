@@ -24,7 +24,7 @@ public class JwtService {
 
     @PostConstruct
     public void init() {
-        // Перетворюємо секрет у Key один раз
+        // 将 secret 一次性转换为 Key
         this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
     }
 

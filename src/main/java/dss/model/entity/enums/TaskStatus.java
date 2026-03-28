@@ -1,9 +1,9 @@
 package dss.model.entity.enums;
 
 public enum TaskStatus {
-    NEW("Нова"),
-    SOLVED("Вирішена"),
-    EMERGENCY("Термінова");
+    NEW("新建"),
+    SOLVED("已解决"),
+    EMERGENCY("紧急");
 
     private final String ukrainianLabel;
 
