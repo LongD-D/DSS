@@ -3,7 +3,7 @@ const urlParts = window.location.pathname.split('/');
 const taskId = urlParts[urlParts.length - 1];
 const taskCategory = document.querySelector('.task-category').textContent;
 
-// Дані про 参数 任务
+// 任务参数数据
 const taskParametersTable = document.getElementById('task-parameters-table');
 const taskParameters = Array.from(taskParametersTable.querySelectorAll('tbody tr')).map(row => ({
     name: row.children[0].innerText.trim(),
@@ -26,9 +26,9 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         console.log(taskCategory);
         const isAnalyst = userRole === 'ANALYST';
         const roleMatchesCategory =
-            (taskCategory === 'Енергетика' && userRole === 'POWER_ENGINEER') ||
-            (taskCategory === 'Економіка' && userRole === 'ECONOMIST') ||
-            (taskCategory === 'Екологія' && userRole === 'ECOLOGIST');
+            (taskCategory === '能源' && userRole === 'POWER_ENGINEER') ||
+            (taskCategory === '经济' && userRole === 'ECONOMIST') ||
+            (taskCategory === '生态' && userRole === 'ECOLOGIST');
 
         if (roleMatchesCategory) {
             const createButton = document.createElement('a');
@@ -73,7 +73,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
 
             document.getElementById('create-decision-container').appendChild(recommendButton);
         }
-        // Створення кнопки "评分" і передача ID
+        // 创建“评分”按钮并传递 ID
         if (userRole === 'ECOLOGIST' || userRole === 'ECONOMIST' || userRole === 'POWER_ENGINEER' || userRole === 'LAWEYR') {
             document.querySelectorAll('[data-decision-id]').forEach(decisionCard => {
                 const decisionId = decisionCard.getAttribute('data-decision-id');
@@ -82,7 +82,7 @@ fetch('http://localhost:8080/api/v1/auth/user', {
                 rateButton.className = "inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2";
                 rateButton.textContent = "评分";
 
-                // ЦЕ ГОЛОВНЕ: передаємо ID у функцію
+                // 关键：把 ID 传入函数
                 rateButton.onclick = () => openRateModal(decisionId);
 
                 decisionCard.appendChild(rateButton);
@@ -110,12 +110,12 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         console.error('错误 获取 用户:', error);
     });
 
-// Відкрити модалку для введення матриці AHP
+// 打开 AHP 矩阵输入弹窗
 function openAHPModal() {
     const modal = document.getElementById('ahp-modal');
     const tableContainer = document.getElementById('ahp-table-container');
 
-    // Генеруємо HTML таблицю для вводу парних порівнянь
+    // 生成用于成对比较输入的 HTML 表格
     let html = '<table class="table-auto border-collapse w-full">';
     html += '<thead><tr><th class="border p-2 bg-gray-100"></th>';
 
@@ -146,12 +146,12 @@ function openAHPModal() {
     modal.classList.remove('hidden');
 }
 
-// 关闭 модалку без обчислення
+// 关闭弹窗（不计算）
 document.getElementById('cancel-ahp').addEventListener('click', () => {
     document.getElementById('ahp-modal').classList.add('hidden');
 });
 
-// Обробка кнопки "计算" в модалці
+// 处理弹窗中的“计算”按钮
 document.getElementById('submit-ahp').addEventListener('click', () => {
     const size = taskParameters.length;
     const matrix = [];
@@ -188,7 +188,7 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
                     <tbody>
                         ${
                 Object.entries(results)
-                    .sort((a, b) => b[1] - a[1]) // сортуємо за спаданням оцінок
+                    .sort((a, b) => b[1] - a[1]) // 按评分降序排序
                     .map(([description, score], index) => `
                                     <tr class="${index === 0 ? 'bg-green-100' : ''}">
                                         <td class="p-2 border">${description}</td>
@@ -214,7 +214,7 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
             document.getElementById('ahp-modal').classList.add('hidden');
         })
         .catch(error => {
-            console.error('错误 при обчисленні AHP:', error);
+            console.error('错误： 计算 AHP:', error);
             alert('无法确定选择结果。');
             document.getElementById('ahp-modal').classList.add('hidden');
         });
@@ -392,13 +392,13 @@ function submitElectre() {
             closeElectreModal();
         });
 }
-// Сортуємо 方案 по категорії
+// 按类别排序方案
 decisions.sort((a, b) => {
     const order = ['APPROVED', 'PROPOSED', 'REJECTED'];
     return order.indexOf(a.decisionStatus) - order.indexOf(b.decisionStatus);
 });
 
-// Рендеримо 方案
+// 渲染方案
 const container = document.getElementById('decisions-container');
 container.innerHTML = '';
 
@@ -446,7 +446,7 @@ function recommendMethod() {
             document.body.appendChild(modal);
         })
         .catch(error => {
-            console.error('错误 рекомендації методу:', error);
+            console.error('错误 推荐方法:', error);
             alert('无法获取推荐。');
         });
 }

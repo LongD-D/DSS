@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Деталі 方案</title>
+    <title>详情 方案</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
@@ -24,7 +24,7 @@
     </header>
 
     <a th:href="@{'/tasks/'+${decision.task.id}}" class="space-y-2" style="display: block">
-        <h2 class="text-xl font-bold">Пов'язана 任务а</h2>
+        <h2 class="text-xl font-bold">关联任务</h2>
         <p><strong>名称：</strong> <span th:text="${decision.task.title}"></span></p>
         <p><strong>描述：</strong> <span th:text="${decision.task.description}"></span></p>
         <p><strong>类别：</strong> <span th:text="${decision.task.category.label}"></span></p>
@@ -59,19 +59,19 @@
         <p><strong>名称：</strong> <span th:text="${decision.title}"></span></p>
         <p><strong>描述：</strong> <span th:text="${decision.description}"></span></p>
         <p><strong>创建于:</strong> <span th:text="${decision.created}"></span></p>
-        <p><strong>作者：</strong> <span id="decision-user-id" th:data-user-id="${decision.user.id}" th:text="${decision.user.name}">Автор</span></p>
+        <p><strong>作者：</strong> <span id="decision-user-id" th:data-user-id="${decision.user.id}" th:text="${decision.user.name}">作者</span></p>
         <p><strong>状态：</strong> <span id="decision-status" th:text="${decision.decisionStatus.ukrName}">STATUS</span></p>
         <p><strong>评分：</strong> <span th:text="${#numbers.formatDecimal(decision.getRate(), 1, 2) + '/10'}"></span></p>
         <p><strong>评分数量：</strong> <span th:text="${decision.expertEvaluations.size()}"></span></p>
-        <!-- Блок кнопок автора -->
+        <!-- 作者按钮区 -->
         <div id="action-buttons" class="bg-white p-4 rounded shadow flex flex-wrap gap-4 items-center">
-            <a href="/decisions" class="text-blue-600 hover:underline">← 返回 до списку</a>
+            <a href="/decisions" class="text-blue-600 hover:underline">← 返回列表</a>
         </div>
     </div>
 
-    <!-- 参数и 方案 -->
+    <!-- 参数 方案 -->
     <div>
-        <h2 class="text-xl font-bold mb-4">参数и 方案</h2>
+        <h2 class="text-xl font-bold mb-4">参数 方案</h2>
         <table class="w-full border text-sm">
             <thead class="bg-gray-100">
             <tr>
@@ -100,24 +100,24 @@
 
 
 
-    <!-- Панель аналітика -->
+    <!-- 分析员面板 -->
     <div id="analyst-panel" class="hidden bg-white p-6 rounded shadow space-y-4">
         <div>
-            <label for="analyst-comment" class="block mb-2 text-sm font-medium text-gray-700">评论 (необов’язково):</label>
+            <label for="analyst-comment" class="block mb-2 text-sm font-medium text-gray-700">评论（可选）:</label>
             <textarea id="analyst-comment" rows="3" class="w-full border p-2 rounded"></textarea>
         </div>
         <div class="flex flex-wrap gap-4" id="status-buttons"></div>
     </div>
 
-    <!-- Оцінки експертів -->
+    <!-- 专家评分 -->
     <div class="bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-bold mb-4">Оцінки експертів</h2>
-        <div th:if="${decision.expertEvaluations.size() == 0}" class="text-gray-600 italic">Оцінки відсутні.</div>
+        <h2 class="text-xl font-bold mb-4">专家评分</h2>
+        <div th:if="${decision.expertEvaluations.size() == 0}" class="text-gray-600 italic">暂无评分。</div>
         <table th:if="${decision.expertEvaluations.size() > 0}" class="w-full text-sm border">
             <thead class="bg-gray-100">
             <tr>
-                <th class="border p-2">Експерт</th>
-                <th class="border p-2">Роль</th>
+                <th class="border p-2">专家</th>
+                <th class="border p-2">角色</th>
                 <th class="border p-2">评分</th>
                 <th class="border p-2">评论</th>
             </tr>
@@ -181,7 +181,7 @@
                 deleteBtn.innerText = '删除';
                 deleteBtn.className = 'text-red-600 hover:underline';
                 deleteBtn.onclick = () => {
-                    if (confirm('Ви впевнені, що хочете 删除 це 方案?')) deleteDecision();
+                    if (confirm('你确定要删除这个 方案?')) deleteDecision();
                 };
 
                 container.appendChild(editBtn);
@@ -191,16 +191,16 @@
             if (roles.includes('ANALYST')) {
                 const panel = document.getElementById('analyst-panel');
                 const statusContainer = document.getElementById('status-buttons');
-                const statusMap = ['СХВАЛЕНО', 'ВІДХИЛЕНО', 'ЗАПРОПОНОВАНО'];
+                const statusMap = ['已批准', '已拒绝', '已提议'];
 
                 for (const status of statusMap) {
                     if (status !== currentStatus) {
                         const btn = document.createElement('button');
                         btn.innerText = status;
                         btn.className = {
-                            'СХВАЛЕНО': 'bg-green-500 hover:bg-green-600',
-                            'ВІДХИЛЕНО': 'bg-red-500 hover:bg-red-600',
-                            'ЗАПРОПОНОВАНО': 'bg-blue-500 hover:bg-blue-600'
+                            '已批准': 'bg-green-500 hover:bg-green-600',
+                            '已拒绝': 'bg-red-500 hover:bg-red-600',
+                            '已提议': 'bg-blue-500 hover:bg-blue-600'
                         }[status] + ' text-white py-2 px-4 rounded';
                         btn.onclick = () => updateStatus(status);
                         statusContainer.appendChild(btn);
@@ -216,17 +216,17 @@
         const comment = document.getElementById('analyst-comment').value.trim();
         let statusValue;
 
-        if (status === 'ВІДХИЛЕНО'){
+        if (status === '已拒绝'){
             statusValue = 'REJECTED';
         }
-        if (status === 'СХВАЛЕНО'){
+        if (status === '已批准'){
             statusValue = 'APPROVED';
         }
-        if (status === 'ЗАПРОПОНОВАНО'){
+        if (status === '已提议'){
             statusValue = 'PROPOSED';
         }
-        if (status === 'ВІДХИЛЕНО' && comment === '') {
-            alert('Для відхилення потрібно вказати коментар.');
+        if (status === '已拒绝' && comment === '') {
+            alert('拒绝时必须填写评论。');
             return;
         }
         console.log(statusValue)
@@ -243,7 +243,7 @@
                     alert('状态 已更新!');
                     location.reload();
                 } else {
-                    alert('错误 оновлення статусу');
+                    alert('错误 更新 状态');
                 }
             });
     }
@@ -255,10 +255,10 @@
         })
             .then(res => {
                 if (res.status === 204) {
-                    alert('方案 видалено');
+                    alert('方案 已删除');
                     window.location.href = '/decisions';
                 } else {
-                    return res.text().then(msg => { throw new Error(msg || '错误 видалення'); });
+                    return res.text().then(msg => { throw new Error(msg || '错误 删除'); });
                 }
             })
             .catch(err => {

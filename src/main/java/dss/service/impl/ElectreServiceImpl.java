@@ -41,19 +41,19 @@ public class ElectreServiceImpl implements ElectreService {
             isBenefit[i] = dir == null || dir == OptimizationDirection.MAXIMIZE;
         }
 
-        System.out.println("\nМатриця рішень:");
+        System.out.println("\n决策矩阵:");
         printMatrix(matrix);
 
         double[][] concordance = calculateConcordance(matrix, weights, isBenefit);
         double[][] discordance = calculateDiscordance(matrix, isBenefit);
 
-        System.out.println("\nМатриця узгодження C:");
+        System.out.println("\n一致性矩阵 C:");
         printMatrix(concordance);
-        System.out.println("\nМатриця неузгодження D:");
+        System.out.println("\n不一致矩阵 D:");
         printMatrix(discordance);
 
-        System.out.println("\nПоріг C: " + cThreshold);
-        System.out.println("Поріг D: " + dThreshold);
+        System.out.println("\n阈值 C: " + cThreshold);
+        System.out.println("阈值 D: " + dThreshold);
 
         boolean[][] dominance = new boolean[m][m];
         for (int a = 0; a < m; a++) {
@@ -65,7 +65,7 @@ public class ElectreServiceImpl implements ElectreService {
             }
         }
 
-        System.out.println("\nМатриця домінування:");
+        System.out.println("\n支配矩阵:");
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < m; j++) {
                 System.out.print((dominance[i][j] ? "1" : "0") + "\t");
@@ -90,7 +90,7 @@ public class ElectreServiceImpl implements ElectreService {
             result.put(decisions.get(i).getTitle(), kernel.contains(i) ? 1.0 : 0.0);
         }
 
-        System.out.println("\nРезультати:");
+        System.out.println("\n结果:");
         result.forEach((k, v) -> System.out.println(k + " = " + v));
 
         return result;

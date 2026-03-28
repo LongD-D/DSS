@@ -22,7 +22,7 @@
 </header>
 
 <div class="max-w-6xl mx-auto bg-white p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-bold mb-6 text-center">创建方案 до 任务</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">为任务创建方案</h1>
 
     <!-- 任务信息 -->
     <div id="task-info" class="mb-8 p-6 bg-gray-50 rounded-lg shadow">
@@ -45,13 +45,13 @@
 
     </div>
 
-    <!-- Форма 创建 方案 -->
+    <!-- 创建方案表单 -->
     <form id="create-decision-form" class="space-y-6">
 
         <!-- Nsme 方案 -->
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">Ім'я 方案</label>
-            <textarea id="title" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入 ім'я 方案"></textarea>
+            <label class="block text-gray-700 font-semibold mb-2" for="description">名称 方案</label>
+            <textarea id="title" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入方案名称"></textarea>
         </div>
         <!-- 描述 方案 -->
         <div>
@@ -59,9 +59,9 @@
             <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" placeholder="请输入描述 方案"></textarea>
         </div>
 
-        <!-- 参数и 方案 -->
+        <!-- 参数 方案 -->
         <div class="mt-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">参数и 方案</h3>
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">参数 方案</h3>
             <div id="parameters-container" class="space-y-4">
                 <div th:each="parameter : ${task.taskParameters}" class="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-wrap items-center gap-3 parameter-block">
                     <div class="flex-1 min-w-[200px]">
@@ -84,14 +84,14 @@
         <div class="mt-6">
             <h3 class="text-xl font-semibold text-gray-800 mb-4">情景 方案</h3>
             <div id="scenarios-container" class="space-y-4">
-                <!-- Тут будуть сценарії -->
+                <!-- 这里将显示场景 -->
             </div>
             <button type="button" id="add-scenario" class="mt-4 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg">
                 添加情景
             </button>
         </div>
 
-        <!-- Кнопка 创建 -->
+        <!-- 创建按钮 -->
         <div class="flex justify-center mt-8">
             <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">
                 创建方案

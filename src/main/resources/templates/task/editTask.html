@@ -54,7 +54,7 @@
             </select>
         </div>
 
-        <!-- 参数и -->
+        <!-- 参数 -->
         <div>
             <h2 class="text-xl font-semibold mt-6 mb-2"> 任务参数</h2>
             <div id="parameters-container" class="space-y-4">
@@ -62,7 +62,7 @@
                     <div class="flex gap-4">
                         <input type="text" class="param-name w-1/3 border rounded px-2 py-1" th:value="${parameter.name}" placeholder="名称">
                         <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" th:value="${parameter.weight}" placeholder="权重">
-                        <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" th:value="${parameter.unit}" placeholder="单位 виміру">
+                        <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" th:value="${parameter.unit}" placeholder="单位 单位">
                         <select name="optimizationDirection" id="optimizationDirection">
                             <option th:each="dir : ${T(dss.model.entity.enums.OptimizationDirection).values()}"
                                     th:value="${dir}"
@@ -88,13 +88,13 @@
 </div>
 
 <script>
-    // Витягуємо ID таски
+    // 提取任务 ID
     const taskId = parseInt(document.getElementById('taskId').value);
 
-    // Токен з localStorage
+    // 从 localStorage 获取 token
     const token = localStorage.getItem('token');
 
-    // Додати новий параметр
+    // 添加新参数
     document.getElementById('add-param').addEventListener('click', () => {
         const container = document.getElementById('parameters-container');
         const paramBlock = document.createElement('div');
@@ -103,7 +103,7 @@
         <div class="flex gap-4">
             <input type="text" class="param-name w-1/3 border rounded px-2 py-1" placeholder="名称">
             <input type="number" step="0.01" class="param-weight w-1/3 border rounded px-2 py-1" placeholder="权重">
-            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 виміру">
+            <input type="text" class="param-unit w-1/3 border rounded px-2 py-1" placeholder="单位 单位">
             <select id="optimizationDirection" class="w-full border rounded px-4 py-2">
                 <option>最大化</option>
                 <option>最小化</option>
@@ -114,7 +114,7 @@
         attachDeleteHandlers();
     });
 
-    // Сабміт форми
+    // 提交表单
     document.getElementById('edit-task-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
@@ -173,14 +173,14 @@
             .then(response => {
                 if (response.ok) {
                     alert('任务更新成功！');
-                    window.location.href = '/tasks/'+taskId; // Повертаємося на список 任务
+                    window.location.href = '/tasks/'+taskId; // 返回到 任务
                 } else {
-                    alert('错误 оновлення 任务!');
+                    alert('错误 更新 任务!');
                 }
             })
-            .catch(error => console.error('错误 при 更新时:', error));
+            .catch(error => console.error('错误： 更新时:', error));
     });
-    // Видалення параметра
+    // 删除参数
     function attachDeleteHandlers() {
         document.querySelectorAll('.delete-param').forEach(button => {
             button.addEventListener('click', (e) => {

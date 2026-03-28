@@ -54,7 +54,7 @@ public class TaskServiceImpl implements TaskService {
         task.setCreated(LocalDateTime.now());
         task.setUser(userService.findUserByEmail(authentication.getName()));
 
-        // створення параметрів
+        // 创建参数
         var parameterList = new ArrayList<TaskParameter>();
         if (taskDto.getTaskParameters() != null) {
             for (TaskParameterDto paramDto : taskDto.getTaskParameters()) {
@@ -63,7 +63,7 @@ public class TaskServiceImpl implements TaskService {
                 param.setWeight(paramDto.getWeight());
                 param.setUnit(paramDto.getUnit());
                 param.setOptimizationDirection(paramDto.getOptimizationDirection());
-                param.setTask(task); // зв’язок з task
+                param.setTask(task); // 与 task
                 parameterList.add(param);
             }
         }
@@ -113,7 +113,7 @@ public class TaskServiceImpl implements TaskService {
             task.setStatus(taskDto.getStatus());
 
         if (taskDto.getTaskParameters() != null) {
-            // Створюємо мапу існуючих параметрів для швидкого доступу
+            // 创建现有参数映射以便快速访问
             Map<String, TaskParameter> existing = task.getTaskParameters().stream()
                     .collect(Collectors.toMap(TaskParameter::getName, p -> p));
 
@@ -149,7 +149,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Map<String, Double> findBestDecisionTOPSIS(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("Задачу не знайдено"));
+                .orElseThrow(() -> new IllegalArgumentException("未找到任务"));
 
         var weights = new double[task.getTaskParameters().size()];
 
@@ -163,11 +163,11 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Map<String, Double> findBestDecisionELECTRE(Long taskId, double cThreshold, double dThreshold) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("Задачу не знайдено"));
+                .orElseThrow(() -> new IllegalArgumentException("未找到任务"));
 
         List<Decision> decisions = task.getDecisions();
         if (decisions == null || decisions.isEmpty()) {
-            throw new IllegalStateException("Немає запропонованих рішень для задачі");
+            throw new IllegalStateException("该任务没有已提议方案");
         }
 
         return electreService.evaluateDecisionsELECTRE(task, cThreshold, dThreshold);
@@ -181,7 +181,7 @@ public class TaskServiceImpl implements TaskService {
         var decision = task.getDecisions().stream()
                 .filter(d -> d.getId().equals(decisionId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Рішення не знайдено серед рішень задачі"));
+                .orElseThrow(() -> new IllegalArgumentException("在任务方案中未找到该方案"));
 
         task.setChosenDecision(decision);
         task.setStatus(TaskStatus.SOLVED);
@@ -205,16 +205,16 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public String recommendBestMethodForTask(Long taskId) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new IllegalArgumentException("Задачу не знайдено"));
+                .orElseThrow(() -> new IllegalArgumentException("未找到任务"));
 
         int numParams = task.getTaskParameters().size();
 
-        // Якщо менше або рівно 6 параметрів — AHP
+        // 如果参数小于等于 6，则使用 AHP
         if (numParams <= 6) {
             return "AHP";
         }
 
-        // Підрахунок напрямків оптимізації
+        // 统计优化方向
         long countMax = task.getTaskParameters().stream()
                 .filter(p -> p.getOptimizationDirection() == OptimizationDirection.MAXIMIZE)
                 .count();
@@ -222,12 +222,12 @@ public class TaskServiceImpl implements TaskService {
                 .filter(p -> p.getOptimizationDirection() == OptimizationDirection.MINIMIZE)
                 .count();
 
-        // Якщо всі напрямки однакові — ELECTRE
+        // 若所有方向一致，则使用 ELECTRE
         if (countMax == numParams || countMin == numParams) {
             return "ELECTRE";
         }
 
-        // Якщо напрямки різні — TOPSIS
+        // 若方向不同，则使用 TOPSIS
         return "TOPSIS";
     }
 

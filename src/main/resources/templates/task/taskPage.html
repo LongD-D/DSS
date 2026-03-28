@@ -53,7 +53,7 @@
 
     </div>
 
-    <!-- 📘 Кнопки для відкриття інформаційних модалок -->
+    <!-- 📘 打开信息弹窗的按钮 -->
     <div class="fixed bottom-6 right-6 z-40 space-y-2">
         <button onclick="openAHPHelpModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-lg">ℹ️ AHP</button>
         <button onclick="openTopsisHelpModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow-lg">ℹ️ TOPSIS</button>
@@ -115,22 +115,22 @@
     </div>
 </div>
 
-    <!-- 🔍 Інформаційна модалка про методи -->
+    <!-- 🔍 方法信息弹窗 -->
     <div id="method-info-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
         <div class="bg-white p-8 rounded-lg shadow-lg max-w-3xl w-full">
             <h2 class="text-2xl font-bold mb-4 text-center">方法说明</h2>
             <div class="space-y-4 text-sm text-gray-700">
                 <div>
                     <h3 class="font-semibold text-lg text-indigo-700">AHP (Analytic Hierarchy Process)</h3>
-                    <p>方法 ієрархічного аналізу дозволяє порівнювати критерії і альтернативи в парах, використовуючи матрицю парних порівнянь. Він корисний, коли є багато суб'єктивних оцінок або нечітких даних.</p>
+                    <p>方法 层次分析 可通过成对比较矩阵对准则和备选方案进行两两比较。当存在大量主观评价或不确定数据时很有用。</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-lg text-purple-700">TOPSIS (Technique for Order Preference by Similarity to Ideal Solution)</h3>
-                    <p>方法, що вибирає альтернативу, яка є найближчою до ідеальної (найкращої) і найдальшою від найгіршої. Добре працює при чітких числових критеріях і великій кількості параметрів.</p>
+                    <p>方法, 用于选择最接近理想（最佳）且最远离最差方案的备选项。在数值型准则明确且参数较多时效果很好。</p>
                 </div>
                 <div>
                     <h3 class="font-semibold text-lg text-emerald-700">ELECTRE (ELimination Et Choix Traduisant la REalité)</h3>
-                    <p>方法 переваг, який базується на порівнянні альтернатив і встановленні порогів згоди/незгоди. Застосовується, коли важко об'єднати всі критерії в одне число, і потрібен компромісний вибір.</p>
+                    <p>方法 偏好方法，基于备选方案比较并设置一致/不一致阈值。当难以将所有准则合并为单一数值且需要折中选择时适用。</p>
                 </div>
             </div>
             <div class="flex justify-center mt-6">
@@ -140,7 +140,7 @@
         </div>
     </div>
 
-    <!-- 📘 Кнопка відкриття інформаційної модалки -->
+    <!-- 📘 打开信息弹窗按钮 -->
     <div class="fixed bottom-20 right-6 z-40">
         <button onclick="document.getElementById('method-info-modal').classList.remove('hidden')"
                 class="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded shadow-lg">
@@ -148,13 +148,13 @@
         </button>
     </div>
 
-    <!-- Модальне вікно -->
+    <!-- 弹窗 -->
 <div id="ahp-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
         <h2 class="text-2xl font-bold mb-6 text-center">请输入两两比较矩阵</h2>
 
         <div id="ahp-table-container" class="overflow-x-auto">
-            <!-- Тут JS-ом вставиться таблиця -->
+            <!-- 这里的表格将由 JS 插入 -->
         </div>
 
         <div class="flex justify-center gap-4 mt-8">
@@ -168,7 +168,7 @@
     </div>
 </div>
 
-<!-- Модалка ELECTRE -->
+<!-- ELECTRE 弹窗 -->
 <div id="electre-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
         <h2 class="text-xl font-bold mb-4 text-center">ELECTRE 阈值</h2>
@@ -187,7 +187,7 @@
     </div>
 </div>
 
-<!-- Модальне вікно для оцінювання -->
+<!-- 评分弹窗 -->
     <div id="rate-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
             <h2 class="text-xl font-bold mb-4 text-center">评分 方案</h2>
@@ -208,18 +208,18 @@
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full">
         <h2 class="text-xl font-bold mb-4 text-center">AHP 方法（层次分析法）</h2>
         <p class="mb-4 text-gray-700">
-            方法 AHP використовує матрицю парних порівнянь для визначення відносної важливості критеріїв. Для кожної пари критеріїв потрібно ввести, наскільки один критерій важливіший за інший за шкалою від 1 до 9:
+            方法 AHP 使用成对比较矩阵来确定各准则的相对重要性。对于每一对准则，需要按 1 到 9 的尺度输入一个准则相对另一个准则的重要程度：
         </p>
         <ul class="list-disc list-inside text-gray-700 mb-4">
-            <li><strong>1</strong> — однакова важливість</li>
-            <li><strong>3</strong> — помірна перевага одного над іншим</li>
-            <li><strong>5</strong> — суттєва перевага</li>
-            <li><strong>7</strong> — явна перевага</li>
-            <li><strong>9</strong> — абсолютна перевага</li>
-            <li><strong>2,4,6,8</strong> — проміжні значення</li>
+            <li><strong>1</strong> — 同等重要</li>
+            <li><strong>3</strong> — 一个相对另一个略有优势</li>
+            <li><strong>5</strong> — 明显优势</li>
+            <li><strong>7</strong> — 强优势</li>
+            <li><strong>9</strong> — 绝对优势</li>
+            <li><strong>2,4,6,8</strong> — 中间值</li>
         </ul>
         <p class="text-gray-700">
-            值 навпроти іншої клітинки автоматично заповнюється як обернене. Наприклад, якщо ви вказали "5", то у відповідній комірці буде "1/5".
+            值 对角对应单元格会自动填入倒数。例如你输入“5”，对应单元格将为“1/5”。
         </p>
         <div class="flex justify-end">
             <button onclick="document.getElementById('ahp-help-modal').classList.add('hidden')" class="bg-blue-500 text-white px-4 py-2 rounded">关闭</button>
@@ -232,14 +232,14 @@
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
         <h2 class="text-xl font-bold mb-4 text-center">ELECTRE 方法</h2>
         <p class="mb-4 text-gray-700">
-            ELECTRE 方法 використовує два пороги для оцінки 方案:
+            ELECTRE 方法 使用两个阈值来评估 方案:
         </p>
         <ul class="list-disc list-inside text-gray-700 mb-4">
-            <li><strong>一致性阈值 (C)：</strong> показує, наскільки одна альтернатива краща за іншу за всіма критеріями загалом.</li>
-            <li><strong>不一致性阈值 (D)：</strong> визначає, чи є суттєві критерії, де альтернатива гірша за іншу.</li>
+            <li><strong>一致性阈值 (C)：</strong> 表示一个备选方案在整体准则上相对另一个方案有多优。</li>
+            <li><strong>不一致性阈值 (D)：</strong> 用于判断是否存在某些关键准则使该方案劣于另一方案。</li>
         </ul>
         <p class="mb-4 text-gray-700">
-            Якщо альтернатива A має високий C і низький D порівняно з B, то A переважає B. Рекомендується встановити C та D між 0.4 і 0.7 залежно від жорсткості відбору.
+            如果方案 A 相比 B 具有较高 C 且较低 D，则 A 优于 B。建议根据筛选严格程度将 C 和 D 设在 0.4 到 0.7 之间。
         </p>
         <div class="flex justify-end">
             <button onclick="document.getElementById('electre-help-modal').classList.add('hidden')" class="bg-blue-500 text-white px-4 py-2 rounded">关闭</button>
@@ -252,10 +252,10 @@
     <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full">
         <h2 class="text-xl font-bold mb-4 text-center">TOPSIS 方法</h2>
         <p class="mb-4 text-gray-700">
-            TOPSIS 方法 (Technique for Order Preference by Similarity to Ideal Solution) вибирає найкращу альтернативу на основі відстані до ідеального 方案.
+            TOPSIS 方法 (Technique for Order Preference by Similarity to Ideal Solution) 根据到理想 方案.
         </p>
         <ul class="list-disc list-inside text-gray-700 mb-4">
-            <li>方案 оцінюються за всіма критеріями та нормалізуються.</li>
+            <li>方案 按所有准则进行评估并归一化.</li>
             <li>计算到理想解和反理想解的距离。</li>
             <li>方案越接近理想解且越远离反理想解，表现越好。</li>
         </ul>

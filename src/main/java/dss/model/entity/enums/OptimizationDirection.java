@@ -1,8 +1,8 @@
 package dss.model.entity.enums;
 
 public enum OptimizationDirection {
-    MINIMIZE("Мінімізація"),
-    MAXIMIZE("Максимізація");
+    MINIMIZE("最小化"),
+    MAXIMIZE("最大化");
 
     private final String label;
 

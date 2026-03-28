@@ -1,4 +1,4 @@
-const token = localStorage.getItem('token'); // беремо токен з localStorage
+const token = localStorage.getItem('token'); // 从 localStorage 获取 token
 
 fetch('http://localhost:8080/api/v1/auth/user', {
     method: 'GET',
@@ -13,17 +13,17 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         const isAnalyst = user.roles.some(role => role.name === "ANALYST");
 
         if (isAnalyst) {
-            // Додаємо кнопку "创建任务"
+            // 添加按钮 "创建任务"
             const createButton = document.createElement('a');
             createButton.href = '/tasks/new';
             createButton.className = "inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-8";
             createButton.textContent = "创建任务";
 
-            // Додаємо кнопку перед блоком з тасками
+            // 添加按钮 到任务区块前
             const container = document.querySelector('.max-w-7xl');
             container.insertBefore(createButton, container.children[7]);
 
-            // ТІЛЬКИ ДЛЯ АНАЛІТИКА додаємо кнопки 编辑/删除
+            // 仅对分析员添加按钮 编辑/删除
             document.querySelectorAll('.task-card').forEach(card => {
                 const taskId = card.getAttribute('data-task-id');
 
@@ -41,13 +41,13 @@ fetch('http://localhost:8080/api/v1/auth/user', {
                 card.querySelector('.buttons-container').appendChild(deleteButton);
             });
         }
-        // Інакше — нічого не додаємо!
+        // 否则不添加任何内容!
     })
     .catch(error => {
         console.error('错误 获取 用户:', error);
     });
 
-// Функція для видалення таски
+// 删除任务函数
 function deleteTask(taskId, card) {
     if (confirm('您确定要删除此任务吗？')) {
         fetch(`http://localhost:8080/api/v1/tasks/${taskId}`, {
@@ -60,7 +60,7 @@ function deleteTask(taskId, card) {
             if (response.ok) {
                 card.remove();
             } else {
-                alert('错误 при 删除时 任务!');
+                alert('错误： 删除时 任务!');
             }
         }).catch(error => {
             console.error('错误:', error);
