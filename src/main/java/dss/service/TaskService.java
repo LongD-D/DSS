@@ -2,6 +2,8 @@ package dss.service;
 
 import dss.dto.TaskDto;
 import dss.dto.TaskParameterDto;
+import dss.dto.AHPAnalysisRequestDto;
+import dss.dto.AHPAnalysisResultDto;
 import dss.model.entity.Decision;
 import dss.model.entity.Task;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,8 @@ public interface TaskService {
     Task updateTask(Long id, TaskDto taskDto);
 
     Map<String, Double> findBestDecisionAHP(Long taskId, double[][] comparisonMatrix);
+
+    AHPAnalysisResultDto analyzeTaskByAHP(Long taskId, AHPAnalysisRequestDto requestDto);
 
     Map<String, Double> findBestDecisionTOPSIS(Long taskId);
 

@@ -1,5 +1,6 @@
 package dss.controller.mvc;
 
+import dss.service.QuestionnaireDataService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Controller
 public class QuestionnaireController {
+
+    private final QuestionnaireDataService questionnaireDataService;
 
     private static final int DEFAULT_DRAW_COUNT = 8;
 
@@ -75,6 +78,8 @@ public class QuestionnaireController {
                         LinkedHashMap::new,
                         Collectors.averagingInt(QuestionAnswerResult::getScore)
                 ));
+
+        questionnaireDataService.recordSubmission(dimensionAverage);
 
         model.addAttribute("overallAverage", overallAverage);
         model.addAttribute("dimensionAverage", dimensionAverage);
