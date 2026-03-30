@@ -27,12 +27,12 @@ fetch('http://localhost:8080/api/v1/auth/user', {
     .then(response => response.json())
     .then(user => {
         const userId = user.id;
-        const userRole = user.roles[0].name;
-        const isAnalyst = userRole === 'ANALYST';
+        const userRoles = (user.roles || []).map(role => role.name);
+        const isAnalyst = userRoles.includes('ANALYST') || userRoles.includes('ROLE_ADMIN');
         const roleMatchesCategory =
-            (taskCategory === '能源' && userRole === 'POWER_ENGINEER') ||
-            (taskCategory === '经济' && userRole === 'ECONOMIST') ||
-            (taskCategory === '生态' && userRole === 'ECOLOGIST');
+            (taskCategory === '能源' && userRoles.includes('POWER_ENGINEER')) ||
+            (taskCategory === '经济' && userRoles.includes('ECONOMIST')) ||
+            (taskCategory === '生态' && userRoles.includes('ECOLOGIST'));
 
         if (roleMatchesCategory) {
             const createButton = document.createElement('a');
@@ -50,7 +50,13 @@ fetch('http://localhost:8080/api/v1/auth/user', {
             document.getElementById('create-decision-container').appendChild(ahpButton);
         }
 
-        if (userRole === 'ECOLOGIST' || userRole === 'ECONOMIST' || userRole === 'POWER_ENGINEER' || userRole === 'LAWEYR') {
+        if (
+            userRoles.includes('ECOLOGIST')
+            || userRoles.includes('ECONOMIST')
+            || userRoles.includes('POWER_ENGINEER')
+            || userRoles.includes('LAWYER')
+            || userRoles.includes('LAWEYR')
+        ) {
             document.querySelectorAll('[data-decision-id]').forEach(decisionCard => {
                 const decisionId = decisionCard.getAttribute('data-decision-id');
                 const rateButton = document.createElement('button');
@@ -95,6 +101,10 @@ function openAHPModal() {
     modal.classList.remove('hidden');
 }
 
+function matrixStorageKey() {
+    return `ahp-matrix-${taskId}`;
+}
+
 function buildMatrixCard(title, key, labels) {
     const wrapper = document.createElement('div');
     wrapper.className = 'mb-6 border rounded p-4';
@@ -125,7 +135,7 @@ document.getElementById('cancel-ahp').addEventListener('click', () => {
     document.getElementById('ahp-modal').classList.add('hidden');
 });
 
-document.getElementById('submit-ahp').addEventListener('click', () => {
+function collectMatrices() {
     const primaryMatrix = collectMatrix('primary', firstLevelCriteria.length);
     const secondaryMatrices = {};
 
@@ -135,7 +145,59 @@ document.getElementById('submit-ahp').addEventListener('click', () => {
             secondaryMatrices[parent] = collectMatrix(`secondary_${parent}`, children.length);
         }
     });
+    return {primaryMatrix, secondaryMatrices};
+}
 
+function fillMatrix(key, matrix) {
+    if (!Array.isArray(matrix)) return;
+    for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix.length; j++) {
+            if (i === j) continue;
+            const input = document.querySelector(`input[data-matrix="${key}"][data-row="${i}"][data-col="${j}"]`);
+            if (input && matrix[i] && typeof matrix[i][j] === 'number') {
+                input.value = matrix[i][j];
+            }
+        }
+    }
+}
+
+document.getElementById('save-ahp-matrix').addEventListener('click', () => {
+    const payload = {...collectMatrices(), savedAt: new Date().toISOString()};
+    localStorage.setItem(matrixStorageKey(), JSON.stringify(payload));
+    alert('AHP 矩阵已保存（当前任务）。');
+});
+
+document.getElementById('load-ahp-matrix').addEventListener('click', () => {
+    const raw = localStorage.getItem(matrixStorageKey());
+    if (!raw) {
+        alert('未找到已保存的矩阵。');
+        return;
+    }
+
+    try {
+        const saved = JSON.parse(raw);
+        fillMatrix('primary', saved.primaryMatrix);
+        firstLevelCriteria.forEach(parent => {
+            const children = secondLevelByParent[parent] || [];
+            if (children.length > 1) {
+                fillMatrix(`secondary_${parent}`, saved.secondaryMatrices?.[parent]);
+            }
+        });
+        alert('已读取保存矩阵。');
+    } catch (error) {
+        console.error('读取矩阵失败:', error);
+        alert('读取矩阵失败，数据格式错误。');
+    }
+});
+
+document.getElementById('reset-ahp-matrix').addEventListener('click', () => {
+    document.querySelectorAll('#ahp-table-container input[data-matrix]').forEach(input => {
+        input.value = 1;
+    });
+});
+
+document.getElementById('submit-ahp').addEventListener('click', () => {
+    const {primaryMatrix, secondaryMatrices} = collectMatrices();
     fetch(`http://localhost:8080/api/v1/tasks/${taskId}/ahp-analysis`, {
         method: 'POST',
         headers: {
@@ -183,6 +245,10 @@ function renderAnalysisResult(result) {
         .map((item, i) => `<tr class="${i === 0 ? 'bg-green-100' : ''}"><td class="p-2 border">${item.rank}</td><td class="p-2 border">${item.decisionTitle}</td><td class="p-2 border">${item.ahpScore.toFixed(4)}</td><td class="p-2 border">${item.expertScore.toFixed(4)}</td><td class="p-2 border">${item.totalScore.toFixed(4)}</td></tr>`)
         .join('');
 
+    const expertRows = Object.entries(result.aggregatedExpertScores || {})
+        .map(([name, score]) => `<tr><td class="p-2 border">${name}</td><td class="p-2 border">${score.toFixed(4)}</td></tr>`)
+        .join('');
+
     const questionnaireRows = Object.entries(result.questionnaireDimensionScores || {})
         .map(([d, score]) => `<li>${d}: ${score.toFixed(2)}</li>`)
         .join('');
@@ -202,6 +268,10 @@ function renderAnalysisResult(result) {
         <div class="mt-4">
             <h4 class="font-semibold mb-2">候选技术综合得分与排名</h4>
             <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">排名</th><th class="p-2 border">候选技术</th><th class="p-2 border">AHP得分</th><th class="p-2 border">专家得分(归一)</th><th class="p-2 border">综合得分</th></tr></thead><tbody>${rankingRows}</tbody></table>
+        </div>
+        <div class="mt-4">
+            <h4 class="font-semibold mb-2">专家评分汇总（归一化）</h4>
+            <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">候选技术</th><th class="p-2 border">专家汇总分</th></tr></thead><tbody>${expertRows || '<tr><td colspan="2" class="p-2 border text-center text-gray-500">暂无专家评分</td></tr>'}</tbody></table>
         </div>
         <div class="mt-4 text-sm text-gray-700">
             <strong>问卷维度汇总（最近一次提交）:</strong>
