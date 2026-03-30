@@ -2,7 +2,7 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
-    <title>任务详情</title>
+    <title>分析与评价详情</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -11,8 +11,8 @@
         <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">任务</a>
-            <a href="/decisions" class="hover:text-blue-600">方案</a>
+            <a href="/tasks" class="hover:text-blue-600">分析与评价</a>
+            <a href="/decisions" class="hover:text-blue-600">候选前沿技术</a>
             <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
             <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
             <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
@@ -22,18 +22,19 @@
 </header>
 
 <div class="max-w-6xl mx-auto pt-24">
-    <h1 class="text-3xl font-bold mb-4">任务： <span th:text="${task.title}" class="text-blue-600"></span></h1>
+    <h1 class="text-3xl font-bold mb-4">分析任务： <span th:text="${task.title}" class="text-blue-600"></span></h1>
     <p class="mb-2 text-gray-700"><strong>描述：</strong> <span th:text="${task.description}"></span></p>
     <p class="mb-2 text-gray-700"><strong>类别：</strong>
         <span class="task-category" th:text="${task.category.label}"></span>
     </p>
     <p class="mb-6 text-gray-700"><strong>状态：</strong> <span th:text="${task.status.label}"></span></p>
 
-    <h2 class="text-2xl font-semibold mb-4">任务参数</h2>
+    <h2 class="text-2xl font-semibold mb-4">评价指标（二级）</h2>
     <table id="task-parameters-table" class="w-full border text-sm mb-8">
         <thead class="bg-gray-200">
         <tr>
-            <th class="p-2 border">名称</th>
+            <th class="p-2 border">一级指标</th>
+            <th class="p-2 border">二级指标</th>
             <th class="p-2 border">权重</th>
             <th class="p-2 border">单位</th>
             <th class="p-2 border">优化方向</th>
@@ -41,6 +42,7 @@
         </thead>
         <tbody>
         <tr th:each="parameter : ${task.taskParameters}">
+            <td class="p-2 border" th:text="${parameter.parentCriterion}"></td>
             <td class="p-2 border" th:text="${parameter.name}"></td>
             <td class="p-2 border" th:text="${parameter.weight}"></td>
             <td class="p-2 border" th:text="${parameter.unit}"></td>
@@ -53,14 +55,14 @@
 
     </div>
 
+    <div id="analysis-result-container" class="bg-white p-4 rounded-lg shadow mb-8 hidden"></div>
+
     <!-- 📘 打开信息弹窗的按钮 -->
     <div class="fixed bottom-6 right-6 z-40 space-y-2">
         <button onclick="openAHPHelpModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-lg">ℹ️ AHP</button>
-        <button onclick="openTopsisHelpModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded shadow-lg">ℹ️ TOPSIS</button>
-        <button onclick="openElectreHelpModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded shadow-lg">ℹ️ ELECTRE</button>
-    </div>
+            </div>
 
-    <h2 class="text-2xl font-semibold mb-4">方案</h2>
+    <h2 class="text-2xl font-semibold mb-4">候选前沿技术</h2>
     <div class="space-y-6">
         <div th:each="decision : ${task.decisions}"
              class="bg-white p-4 rounded-lg shadow"
@@ -87,7 +89,7 @@
                 </li>
             </ul>
 
-            <h4 class="font-semibold">方案参数：</h4>
+            <h4 class="font-semibold">候选前沿技术参数：</h4>
             <table class="w-full border text-sm mt-2">
                 <thead class="bg-gray-100">
                 <tr>
@@ -100,7 +102,7 @@
                 <tr th:each="parameter : ${decision.decisionParameters}">
                     <td class="p-2 border" th:text="${parameter.taskParameter.name}"></td>
                     <td class="p-2 border" th:text="${parameter.value + ' ' + parameter.taskParameter.unit}"></td>
-                    <td class="p-2 border" th:text="${parameter.comment}"></td>\
+                    <td class="p-2 border" th:text="${parameter.comment}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -111,7 +113,7 @@
                 <strong>评分数量：</strong> <span th:text="${decision.getExpertEvaluations().size()}"></span>
 
             </p>
-        </d>
+        </div>
     </div>
 </div>
 
@@ -122,15 +124,11 @@
             <div class="space-y-4 text-sm text-gray-700">
                 <div>
                     <h3 class="font-semibold text-lg text-indigo-700">AHP (Analytic Hierarchy Process)</h3>
-                    <p>方法 层次分析 可通过成对比较矩阵对准则和备选方案进行两两比较。当存在大量主观评价或不确定数据时很有用。</p>
+                    <p>方法 层次分析 可通过成对比较矩阵对准则和备选候选前沿技术进行两两比较。当存在大量主观评价或不确定数据时很有用。</p>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-lg text-purple-700">TOPSIS (Technique for Order Preference by Similarity to Ideal Solution)</h3>
-                    <p>方法, 用于选择最接近理想（最佳）且最远离最差方案的备选项。在数值型准则明确且参数较多时效果很好。</p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-emerald-700">ELECTRE (ELimination Et Choix Traduisant la REalité)</h3>
-                    <p>方法 偏好方法，基于备选方案比较并设置一致/不一致阈值。当难以将所有准则合并为单一数值且需要折中选择时适用。</p>
+                    <h3 class="font-semibold text-lg text-purple-700">说明</h3>
+                    <p>当前“分析与评价”流程仅开放 AHP 方法进行计算与排序。</p>
                 </div>
             </div>
             <div class="flex justify-center mt-6">
@@ -168,29 +166,10 @@
     </div>
 </div>
 
-<!-- ELECTRE 弹窗 -->
-<div id="electre-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4 text-center">ELECTRE 阈值</h2>
-        <label class="block mb-2">
-            阈值 C：
-            <input type="number" id="c-threshold" class="w-full border p-2 rounded" step="0.01" value="0.5">
-        </label>
-        <label class="block mb-4">
-            阈值 D：
-            <input type="number" id="d-threshold" class="w-full border p-2 rounded" step="0.01" value="0.5">
-        </label>
-        <div class="flex justify-end gap-4">
-            <button onclick="submitElectre()" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">OK</button>
-            <button onclick="closeElectreModal()" class="bg-gray-400 hover:bg-gray-500 text-white py-2 px-4 rounded">取消</button>
-        </div>
-    </div>
-</div>
-
 <!-- 评分弹窗 -->
     <div id="rate-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white p-6 rounded shadow-lg w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4 text-center">评分 方案</h2>
+            <h2 class="text-xl font-bold mb-4 text-center">评分 候选前沿技术</h2>
             <label class="block mb-2">评分 (0-10)：</label>
             <input type="number" id="rate-score" class="w-full border p-2 rounded mb-4" min="0" max="10" step="0.1">
             <label class="block mb-2">评论（可选）：</label>
@@ -227,52 +206,14 @@
     </div>
 </div>
 
-<!-- ELECTRE Help Modal -->
-<div id="electre-help-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-xl w-full">
-        <h2 class="text-xl font-bold mb-4 text-center">ELECTRE 方法</h2>
-        <p class="mb-4 text-gray-700">
-            ELECTRE 方法 使用两个阈值来评估 方案:
-        </p>
-        <ul class="list-disc list-inside text-gray-700 mb-4">
-            <li><strong>一致性阈值 (C)：</strong> 表示一个备选方案在整体准则上相对另一个方案有多优。</li>
-            <li><strong>不一致性阈值 (D)：</strong> 用于判断是否存在某些关键准则使该方案劣于另一方案。</li>
-        </ul>
-        <p class="mb-4 text-gray-700">
-            如果方案 A 相比 B 具有较高 C 且较低 D，则 A 优于 B。建议根据筛选严格程度将 C 和 D 设在 0.4 到 0.7 之间。
-        </p>
-        <div class="flex justify-end">
-            <button onclick="document.getElementById('electre-help-modal').classList.add('hidden')" class="bg-blue-500 text-white px-4 py-2 rounded">关闭</button>
-        </div>
-    </div>
-</div>
-
-<!-- TOPSIS Help Modal -->
-<div id="topsis-help-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full">
-        <h2 class="text-xl font-bold mb-4 text-center">TOPSIS 方法</h2>
-        <p class="mb-4 text-gray-700">
-            TOPSIS 方法 (Technique for Order Preference by Similarity to Ideal Solution) 根据到理想 方案.
-        </p>
-        <ul class="list-disc list-inside text-gray-700 mb-4">
-            <li>方案 按所有准则进行评估并归一化.</li>
-            <li>计算到理想解和反理想解的距离。</li>
-            <li>方案越接近理想解且越远离反理想解，表现越好。</li>
-        </ul>
-        <p class="text-gray-700">TOPSIS 在定量标准和大量备选方案场景下效果最佳。</p>
-        <div class="flex justify-end">
-            <button onclick="document.getElementById('topsis-help-modal').classList.add('hidden')" class="bg-blue-500 text-white px-4 py-2 rounded">关闭</button>
-        </div>
-    </div>
-</div>
 <script th:src="@{/js/taskPage.js}"></script>
 <script th:src="@{/js/evaluation.js}"></script>
     <script>
         const token = localStorage.getItem('token');
 
         if (token) {
-            document.getElementById('nav-login')?.classList.add('hidden');
-            document.getElementById('nav-logout')?.classList.remove('hidden');
+            document.getElementById('login-link')?.classList.add('hidden');
+            document.getElementById('logout-link')?.classList.remove('hidden');
 
             fetch('/api/v1/auth/user', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -281,8 +222,8 @@
                 .then(user => {
                     const roles = user.roles.map(r => r.name);
                     if (roles.includes('ROLE_ADMIN')) {
-                        document.getElementById('nav-role')?.classList.remove('hidden');
-                        document.getElementById('nav-users')?.classList.remove('hidden');
+                        document.getElementById('role-link')?.classList.remove('hidden');
+                        document.getElementById('users-link')?.classList.remove('hidden');
                     }
                 })
                 .catch(() => {
@@ -291,7 +232,7 @@
                 });
         }
 
-        document.getElementById('nav-logout')?.addEventListener('click', () => {
+        document.getElementById('logout-link')?.addEventListener('click', () => {
             localStorage.removeItem('token');
             window.location.href = '/login';
         });
@@ -304,17 +245,6 @@
         modal.classList.add('flex');
     }
 
-    function openElectreHelpModal() {
-        const modal = document.getElementById('electre-help-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function openTopsisHelpModal() {
-        const modal = document.getElementById('topsis-help-modal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
 
 </script>
 </body>

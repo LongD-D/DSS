@@ -2,6 +2,8 @@ package dss.service.impl;
 
 import dss.dto.TaskDto;
 import dss.dto.TaskParameterDto;
+import dss.dto.AHPAnalysisRequestDto;
+import dss.dto.AHPAnalysisResultDto;
 import dss.model.entity.Decision;
 import dss.model.entity.Task;
 import dss.model.entity.TaskParameter;
@@ -60,6 +62,7 @@ public class TaskServiceImpl implements TaskService {
             for (TaskParameterDto paramDto : taskDto.getTaskParameters()) {
                 var param = new TaskParameter();
                 param.setName(paramDto.getName());
+                param.setParentCriterion(paramDto.getParentCriterion());
                 param.setWeight(paramDto.getWeight());
                 param.setUnit(paramDto.getUnit());
                 param.setOptimizationDirection(paramDto.getOptimizationDirection());
@@ -89,6 +92,7 @@ public class TaskServiceImpl implements TaskService {
             var taskParameter = new TaskParameter();
             taskParameter.setTask(task);
             taskParameter.setName(taskParameterDto.getName());
+            taskParameter.setParentCriterion(taskParameterDto.getParentCriterion());
             taskParameter.setWeight(taskParameterDto.getWeight());
             taskParameter.setUnit(taskParameterDto.getUnit());
             taskParameter.setOptimizationDirection(taskParameterDto.getOptimizationDirection());
@@ -122,6 +126,7 @@ public class TaskServiceImpl implements TaskService {
             for (TaskParameterDto dto : taskDto.getTaskParameters()) {
                 TaskParameter param = existing.getOrDefault(dto.getName(), new TaskParameter());
                 param.setName(dto.getName());
+                param.setParentCriterion(dto.getParentCriterion());
                 param.setWeight(dto.getWeight());
                 param.setUnit(dto.getUnit());
                 param.setTask(task);
@@ -142,6 +147,13 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(() -> new RuntimeException("Task with id: " + taskId + ", not found"));
 
         return ahpService.evaluateDecisionsAHP(task, comparisonMatrix);
+    }
+
+    @Override
+    public AHPAnalysisResultDto analyzeTaskByAHP(Long taskId, AHPAnalysisRequestDto requestDto) {
+        var task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new RuntimeException("Task with id: " + taskId + ", not found"));
+        return ahpService.evaluateTask(task, requestDto);
     }
 
 // TaskServiceImpl.java

@@ -2,7 +2,7 @@
 <html lang="uk" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>任务列表</title>
+    <title>分析与评价列表</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
@@ -12,7 +12,7 @@
         <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/tasks" class="hover:text-blue-600">分析与评价</a>
             <a href="/decisions" class="hover:text-blue-600">决策</a>
             <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
             <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
@@ -24,7 +24,7 @@
 </header>
 
 <div class="max-w-7xl mx-auto pt-24">
-    <h1 class="text-3xl font-bold mb-8 text-center">任务列表 </h1>
+    <h1 class="text-3xl font-bold mb-8 text-center">分析与评价列表 </h1>
 
     <!-- 筛选表单 -->
     <form method="get" th:action="@{/tasks}" class="mb-6 flex flex-wrap justify-center gap-4">
@@ -100,7 +100,7 @@
             <div class="mt-4">
                 <a th:href="@{'/tasks/' + ${task.id}}"
                    class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition">
-                    查看任务
+                    查看分析
                 </a>
             </div>
             <div class="buttons-container mt-2 flex gap-2"></div>
@@ -112,8 +112,8 @@
     const token = localStorage.getItem('token');
 
     if (token) {
-        document.getElementById('nav-login')?.classList.add('hidden');
-        document.getElementById('nav-logout')?.classList.remove('hidden');
+        document.getElementById('login-link')?.classList.add('hidden');
+        document.getElementById('logout-link')?.classList.remove('hidden');
 
         fetch('/api/v1/auth/user', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -122,8 +122,8 @@
             .then(user => {
                 const roles = user.roles.map(r => r.name);
                 if (roles.includes('ROLE_ADMIN')) {
-                    document.getElementById('nav-role')?.classList.remove('hidden');
-                    document.getElementById('nav-users')?.classList.remove('hidden');
+                    document.getElementById('role-link')?.classList.remove('hidden');
+                    document.getElementById('users-link')?.classList.remove('hidden');
                 }
             })
             .catch(() => {
@@ -132,7 +132,7 @@
             });
     }
 
-    document.getElementById('nav-logout')?.addEventListener('click', () => {
+    document.getElementById('logout-link')?.addEventListener('click', () => {
         localStorage.removeItem('token');
         window.location.href = '/login';
     });
