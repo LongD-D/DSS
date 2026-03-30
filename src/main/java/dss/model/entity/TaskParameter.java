@@ -22,6 +22,11 @@ public class TaskParameter {
     @NotBlank
     private String name;
 
+    /**
+     * 一级指标名称（两级指标体系中的父指标）
+     */
+    private String parentCriterion;
+
     @NotNull
     private double weight;
 

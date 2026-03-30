@@ -11,6 +11,8 @@ import lombok.Data;
 public class TaskParameterDto {
     @NotBlank
     private String name;
+    @NotBlank
+    private String parentCriterion;
     @NotNull
     private double weight;
     @NotNull

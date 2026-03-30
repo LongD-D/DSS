@@ -2,6 +2,8 @@ package dss.controller.rest;
 
 import dss.dto.TaskDto;
 import dss.dto.TaskParameterDto;
+import dss.dto.AHPAnalysisRequestDto;
+import dss.dto.AHPAnalysisResultDto;
 import dss.model.entity.Decision;
 import dss.model.entity.Task;
 import dss.service.TaskService;
@@ -59,6 +61,12 @@ public class TaskRestController {
     public ResponseEntity<Map<String, Double>> getAHPTask(@PathVariable Long taskId,
                                                           @RequestBody double[][] comparisonMatrix) {
         return ResponseEntity.ok(taskService.findBestDecisionAHP(taskId, comparisonMatrix));
+    }
+
+    @PostMapping("/{taskId}/ahp-analysis")
+    public ResponseEntity<AHPAnalysisResultDto> analyzeTaskByAHP(@PathVariable Long taskId,
+                                                                  @RequestBody AHPAnalysisRequestDto requestDto) {
+        return ResponseEntity.ok(taskService.analyzeTaskByAHP(taskId, requestDto));
     }
 
     @PostMapping("/{taskId}/topsis")

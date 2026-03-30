@@ -3,13 +3,19 @@ const urlParts = window.location.pathname.split('/');
 const taskId = urlParts[urlParts.length - 1];
 const taskCategory = document.querySelector('.task-category').textContent;
 
-// 任务参数数据
 const taskParametersTable = document.getElementById('task-parameters-table');
 const taskParameters = Array.from(taskParametersTable.querySelectorAll('tbody tr')).map(row => ({
-    name: row.children[0].innerText.trim(),
-    weight: parseFloat(row.children[1].innerText.trim()),
-    unit: row.children[2].innerText.trim()
+    parent: row.children[0].innerText.trim() || '默认一级指标',
+    name: row.children[1].innerText.trim(),
+    weight: parseFloat(row.children[2].innerText.trim())
 }));
+
+const firstLevelCriteria = [...new Set(taskParameters.map(p => p.parent))];
+const secondLevelByParent = taskParameters.reduce((acc, p) => {
+    if (!acc[p.parent]) acc[p.parent] = [];
+    acc[p.parent].push(p.name);
+    return acc;
+}, {});
 
 fetch('http://localhost:8080/api/v1/auth/user', {
     method: 'GET',
@@ -22,8 +28,6 @@ fetch('http://localhost:8080/api/v1/auth/user', {
     .then(user => {
         const userId = user.id;
         const userRole = user.roles[0].name;
-        console.log(userRole);
-        console.log(taskCategory);
         const isAnalyst = userRole === 'ANALYST';
         const roleMatchesCategory =
             (taskCategory === '能源' && userRole === 'POWER_ENGINEER') ||
@@ -33,420 +37,175 @@ fetch('http://localhost:8080/api/v1/auth/user', {
         if (roleMatchesCategory) {
             const createButton = document.createElement('a');
             createButton.href = `/decisions/create?taskId=${taskId}`;
-            createButton.className = "inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4";
-            createButton.textContent = "提交方案";
-
+            createButton.className = 'inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mb-4';
+            createButton.textContent = '提交候选前沿技术';
             document.getElementById('create-decision-container').appendChild(createButton);
         }
 
         if (isAnalyst) {
             const ahpButton = document.createElement('button');
-            ahpButton.className = "inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            ahpButton.textContent = "选择最佳方案 (AHP)";
+            ahpButton.className = 'inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4';
+            ahpButton.textContent = '执行AHP分析与评价';
             ahpButton.onclick = openAHPModal;
-
             document.getElementById('create-decision-container').appendChild(ahpButton);
         }
 
-        if (isAnalyst) {
-            const topsisButton = document.createElement('button');
-            topsisButton.className = "inline-block bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            topsisButton.textContent = "选择最佳方案 (TOPSIS)";
-            topsisButton.onclick = calculateTopsis;
-
-            document.getElementById('create-decision-container').appendChild(topsisButton);
-        }
-        if (isAnalyst) {
-            const electreButton = document.createElement('button');
-            electreButton.className = "inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            electreButton.textContent = "选择最佳方案 (ELECTRE)";
-            electreButton.onclick = () => {
-                document.getElementById('electre-modal').classList.remove('hidden');
-            };
-            document.getElementById('create-decision-container').appendChild(electreButton);
-        }
-        if (isAnalyst) {
-            const recommendButton = document.createElement('button');
-            recommendButton.className = "inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded mb-4 ml-4";
-            recommendButton.textContent = "查看推荐方法";
-            recommendButton.onclick = recommendMethod;
-
-            document.getElementById('create-decision-container').appendChild(recommendButton);
-        }
-        // 创建“评分”按钮并传递 ID
         if (userRole === 'ECOLOGIST' || userRole === 'ECONOMIST' || userRole === 'POWER_ENGINEER' || userRole === 'LAWEYR') {
             document.querySelectorAll('[data-decision-id]').forEach(decisionCard => {
                 const decisionId = decisionCard.getAttribute('data-decision-id');
-
                 const rateButton = document.createElement('button');
-                rateButton.className = "inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2";
-                rateButton.textContent = "评分";
-
-                // 关键：把 ID 传入函数
+                rateButton.className = 'inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2';
+                rateButton.textContent = '评分';
                 rateButton.onclick = () => openRateModal(decisionId);
-
                 decisionCard.appendChild(rateButton);
             });
         }
-
 
         document.querySelectorAll('[data-decision-id]').forEach(decisionCard => {
             const decisionUserId = parseInt(decisionCard.getAttribute('data-decision-user-id'));
             if (decisionUserId === userId) {
                 const decisionId = decisionCard.getAttribute('data-decision-id');
-
                 const editButton = document.createElement('a');
                 editButton.href = `/decisions/${decisionId}/edit`;
-                editButton.className = "inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2";
-                editButton.textContent = "编辑 方案";
-
+                editButton.className = 'inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded ml-2 mt-2';
+                editButton.textContent = '编辑候选技术';
                 decisionCard.appendChild(editButton);
             }
         });
     })
     .catch(error => {
-        alert("您需要先登录。")
-        window.location.href = "/login";
+        alert('您需要先登录。');
+        window.location.href = '/login';
         console.error('错误 获取 用户:', error);
     });
 
-// 打开 AHP 矩阵输入弹窗
 function openAHPModal() {
     const modal = document.getElementById('ahp-modal');
     const tableContainer = document.getElementById('ahp-table-container');
+    tableContainer.innerHTML = '';
 
-    // 生成用于成对比较输入的 HTML 表格
-    let html = '<table class="table-auto border-collapse w-full">';
-    html += '<thead><tr><th class="border p-2 bg-gray-100"></th>';
-
-    taskParameters.forEach(param => {
-        html += `<th class="border p-2 bg-gray-100">${param.name}</th>`;
+    tableContainer.appendChild(buildMatrixCard('一级指标判断矩阵', 'primary', firstLevelCriteria));
+    firstLevelCriteria.forEach(parent => {
+        const children = secondLevelByParent[parent] || [];
+        if (children.length > 1) {
+            tableContainer.appendChild(buildMatrixCard(`二级指标判断矩阵 - ${parent}`, `secondary_${parent}`, children));
+        }
     });
+
+    modal.classList.remove('hidden');
+}
+
+function buildMatrixCard(title, key, labels) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mb-6 border rounded p-4';
+
+    let html = `<h3 class="font-semibold mb-3">${title}</h3><table class="table-auto border-collapse w-full">`;
+    html += '<thead><tr><th class="border p-2 bg-gray-100"></th>';
+    labels.forEach(label => html += `<th class="border p-2 bg-gray-100">${label}</th>`);
     html += '</tr></thead><tbody>';
 
-    taskParameters.forEach((rowParam, i) => {
-        html += `<tr><th class="border p-2 bg-gray-100">${rowParam.name}</th>`;
-        taskParameters.forEach((colParam, j) => {
+    labels.forEach((rowLabel, i) => {
+        html += `<tr><th class="border p-2 bg-gray-100">${rowLabel}</th>`;
+        labels.forEach((_, j) => {
             if (i === j) {
-                html += `<td class="border p-2 text-center">
-                            <input type="number" value="1" readonly class="w-20 text-center bg-gray-200 border-gray-300 rounded">
-                         </td>`;
+                html += '<td class="border p-2 text-center"><input type="number" value="1" readonly class="w-20 text-center bg-gray-200 border-gray-300 rounded"></td>';
             } else {
-                html += `<td class="border p-2 text-center">
-                            <input type="number" step="0.01" min="0" class="w-20 text-center border-gray-300 rounded" data-row="${i}" data-col="${j}">
-                         </td>`;
+                html += `<td class="border p-2 text-center"><input type="number" step="0.01" min="0.11" value="1" class="w-20 text-center border-gray-300 rounded" data-matrix="${key}" data-row="${i}" data-col="${j}"></td>`;
             }
         });
         html += '</tr>';
     });
 
     html += '</tbody></table>';
-    tableContainer.innerHTML = html;
-
-    modal.classList.remove('hidden');
+    wrapper.innerHTML = html;
+    return wrapper;
 }
 
-// 关闭弹窗（不计算）
 document.getElementById('cancel-ahp').addEventListener('click', () => {
     document.getElementById('ahp-modal').classList.add('hidden');
 });
 
-// 处理弹窗中的“计算”按钮
 document.getElementById('submit-ahp').addEventListener('click', () => {
-    const size = taskParameters.length;
-    const matrix = [];
+    const primaryMatrix = collectMatrix('primary', firstLevelCriteria.length);
+    const secondaryMatrices = {};
 
+    firstLevelCriteria.forEach(parent => {
+        const children = secondLevelByParent[parent] || [];
+        if (children.length > 1) {
+            secondaryMatrices[parent] = collectMatrix(`secondary_${parent}`, children.length);
+        }
+    });
+
+    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/ahp-analysis`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ primaryMatrix, secondaryMatrices })
+    })
+        .then(response => response.json())
+        .then(renderAnalysisResult)
+        .catch(error => {
+            console.error('错误： 计算 AHP:', error);
+            alert('无法执行分析与评价。');
+        })
+        .finally(() => {
+            document.getElementById('ahp-modal').classList.add('hidden');
+        });
+});
+
+function collectMatrix(key, size) {
+    const matrix = [];
     for (let i = 0; i < size; i++) {
         matrix[i] = [];
         for (let j = 0; j < size; j++) {
-            const input = document.querySelector(`input[data-row="${i}"][data-col="${j}"]`);
+            const input = document.querySelector(`input[data-matrix="${key}"][data-row="${i}"][data-col="${j}"]`);
             matrix[i][j] = (i === j) ? 1 : (input ? parseFloat(input.value) || 1 : 1);
         }
     }
-
-    console.log('两两比较矩阵：', matrix);
-
-    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/ahp`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(matrix)
-    })
-        .then(response => response.json())
-        .then(results => {
-            const resultModal = document.createElement('div');
-            resultModal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center";
-            resultModal.innerHTML = `
-            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
-                <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (AHP)</h2>
-                <table class="w-full border text-sm mb-6">
-                    <thead class="bg-gray-200">
-                        <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
-                    </thead>
-                    <tbody>
-                        ${
-                Object.entries(results)
-                    .sort((a, b) => b[1] - a[1]) // 按评分降序排序
-                    .map(([description, score], index) => `
-                                    <tr class="${index === 0 ? 'bg-green-100' : ''}">
-                                        <td class="p-2 border">${description}</td>
-                                        <td class="p-2 border">${score.toFixed(2)}</td>
-                                    </tr>
-                                `).join('')
-            }
-                    </tbody>
-                </table>
-                <div class="flex justify-center">
-                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" id="close-result-modal">
-                        关闭
-                    </button>
-                </div>
-            </div>
-        `;
-            document.body.appendChild(resultModal);
-
-            document.getElementById('close-result-modal').addEventListener('click', () => {
-                resultModal.remove();
-            });
-
-            document.getElementById('ahp-modal').classList.add('hidden');
-        })
-        .catch(error => {
-            console.error('错误： 计算 AHP:', error);
-            alert('无法确定选择结果。');
-            document.getElementById('ahp-modal').classList.add('hidden');
-        });
-});
-
-function calculateTopsis() {
-    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/topsis`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(result => {
-            const sorted = Object.entries(result)
-                .sort(([, a], [, b]) => b - a);
-
-            const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
-
-            modal.innerHTML = `
-            <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-                <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (TOPSIS)</h2>
-                <table class="w-full border text-sm mb-6">
-                    <thead class="bg-gray-200">
-                        <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
-                    </thead>
-                    <tbody>
-                        ${sorted.map(([desc, score], i) => `
-                            <tr class="${i === 0 ? 'bg-green-100' : ''}">
-                                <td class="p-2 border">${desc}</td>
-                                <td class="p-2 border">${score.toFixed(4)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                <div class="flex justify-center">
-                    <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
-                </div>
-            </div>
-        `;
-
-            document.body.appendChild(modal);
-        })
-        .catch(error => {
-            console.error('TOPSIS 错误：', error);
-            alert('无法确定最佳方案 (TOPSIS)。');
-        });
+    return matrix;
 }
 
-function calculateElectre() {
-    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/electre`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(result => {
-            const sorted = Object.entries(result)
-                .sort(([, a], [, b]) => b - a);
+function renderAnalysisResult(result) {
+    const container = document.getElementById('analysis-result-container');
+    container.classList.remove('hidden');
 
-            const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
+    const consistencyRows = Object.entries(result.consistencyByLevel || {})
+        .map(([level, val]) => `<tr><td class="p-2 border">${level}</td><td class="p-2 border">${val.ci.toFixed(4)}</td><td class="p-2 border">${val.cr.toFixed(4)}</td><td class="p-2 border ${val.consistent ? 'text-green-600' : 'text-red-600'}">${val.consistent ? '通过' : '未通过'}</td></tr>`)
+        .join('');
 
-            modal.innerHTML = `
-                <div class="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
-                    <h2 class="text-2xl font-bold mb-6 text-center">选择结果 (ELECTRE)</h2>
-                    <table class="w-full border text-sm mb-6">
-                        <thead class="bg-gray-200">
-                            <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
-                        </thead>
-                        <tbody>
-                            ${sorted.map(([desc, score], i) => `
-                                <tr class="${i === 0 ? 'bg-green-100' : ''}">
-                                    <td class="p-2 border">${desc}</td>
-                                    <td class="p-2 border">${score.toFixed(4)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div class="flex justify-center">
-                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
-                    </div>
-                </div>
-            `;
+    const weightRows = Object.entries(result.criteriaWeights || {})
+        .map(([name, w]) => `<tr><td class="p-2 border">${name}</td><td class="p-2 border">${w.toFixed(4)}</td></tr>`)
+        .join('');
 
-            document.body.appendChild(modal);
-        })
-        .catch(error => {
-            console.error('ELECTRE 错误：', error);
-            alert('无法确定最佳方案 (ELECTRE)。');
-        });
-}
+    const rankingRows = (result.ranking || [])
+        .map((item, i) => `<tr class="${i === 0 ? 'bg-green-100' : ''}"><td class="p-2 border">${item.rank}</td><td class="p-2 border">${item.decisionTitle}</td><td class="p-2 border">${item.ahpScore.toFixed(4)}</td><td class="p-2 border">${item.expertScore.toFixed(4)}</td><td class="p-2 border">${item.totalScore.toFixed(4)}</td></tr>`)
+        .join('');
 
-function openElectreModal() {
-    const modal = document.createElement('div');
-    modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
-    modal.innerHTML = `
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 class="text-xl font-bold mb-4 text-center">请输入 ELECTRE 阈值</h2>
-            <label class="block mb-2">一致性阈值 (C)：</label>
-            <input id="c-threshold" type="number" step="0.01" min="0" max="1" value="0.5"
-                   class="w-full p-2 border rounded mb-4" />
-            <label class="block mb-2">不一致性阈值 (D)：</label>
-            <input id="d-threshold" type="number" step="0.01" min="0" max="1" value="0.5"
-                   class="w-full p-2 border rounded mb-6" />
-            <div class="flex justify-end space-x-2">
-                <button class="bg-gray-300 px-4 py-2 rounded" onclick="this.closest('.fixed').remove()">取消</button>
-                <button class="bg-green-500 text-white px-4 py-2 rounded" onclick="submitElectre()">计算</button>
+    const questionnaireRows = Object.entries(result.questionnaireDimensionScores || {})
+        .map(([d, score]) => `<li>${d}: ${score.toFixed(2)}</li>`)
+        .join('');
+
+    container.innerHTML = `
+        <h3 class="text-xl font-bold mb-4">分析结果</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="font-semibold mb-2">一致性检验 (CI/CR)</h4>
+                <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">层级</th><th class="p-2 border">CI</th><th class="p-2 border">CR</th><th class="p-2 border">结论</th></tr></thead><tbody>${consistencyRows}</tbody></table>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">二级指标综合权重</h4>
+                <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">指标</th><th class="p-2 border">权重</th></tr></thead><tbody>${weightRows}</tbody></table>
             </div>
         </div>
+        <div class="mt-4">
+            <h4 class="font-semibold mb-2">候选技术综合得分与排名</h4>
+            <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">排名</th><th class="p-2 border">候选技术</th><th class="p-2 border">AHP得分</th><th class="p-2 border">专家得分(归一)</th><th class="p-2 border">综合得分</th></tr></thead><tbody>${rankingRows}</tbody></table>
+        </div>
+        <div class="mt-4 text-sm text-gray-700">
+            <strong>问卷维度汇总（最近一次提交）:</strong>
+            <ul class="list-disc pl-6">${questionnaireRows || '<li>暂无问卷提交数据</li>'}</ul>
+        </div>
     `;
-    document.body.appendChild(modal);
-}
-function openElectreModal() {
-    document.getElementById('electre-modal').classList.remove('hidden');
-}
-
-function closeElectreModal() {
-    document.getElementById('electre-modal').classList.add('hidden');
-}
-
-function submitElectre() {
-    const cThreshold = parseFloat(document.getElementById('c-threshold').value) || 0.5;
-    const dThreshold = parseFloat(document.getElementById('d-threshold').value) || 0.5;
-
-    const payload = {
-        cThreshold: cThreshold,
-        dThreshold: dThreshold
-    };
-
-    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/electre`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-        .then(res => res.json())
-        .then(result => {
-            const sorted = Object.entries(result).sort(([, a], [, b]) => b - a);
-
-            const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
-            modal.innerHTML = `
-                <div class="bg-white p-6 rounded shadow-lg max-w-2xl w-full">
-                    <h2 class="text-xl font-bold mb-4 text-center">选择结果 (ELECTRE)</h2>
-                    <table class="w-full border text-sm mb-4">
-                        <thead class="bg-gray-200">
-                            <tr><th class="p-2 border">方案</th><th class="p-2 border">评分</th></tr>
-                        </thead>
-                        <tbody>
-                            ${sorted.map(([desc, score]) => `
-                                <tr class="${score === 1 ? 'bg-green-100' : ''}">
-                                    <td class="p-2 border">${desc}</td>
-                                    <td class="p-2 border">${score.toFixed(4)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <div class="flex justify-center">
-                        <button onclick="this.closest('.fixed').remove()" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">关闭</button>
-                    </div>
-                </div>`;
-            document.body.appendChild(modal);
-            closeElectreModal();
-        })
-        .catch(error => {
-            console.error('ELECTRE 错误：', error);
-            alert('无法计算 ELECTRE。');
-            closeElectreModal();
-        });
-}
-// 按类别排序方案
-decisions.sort((a, b) => {
-    const order = ['APPROVED', 'PROPOSED', 'REJECTED'];
-    return order.indexOf(a.decisionStatus) - order.indexOf(b.decisionStatus);
-});
-
-// 渲染方案
-const container = document.getElementById('decisions-container');
-container.innerHTML = '';
-
-decisions.forEach(decision => {
-    const html = `
-        <a href="/decisions/${decision.id}" class="bg-white p-4 rounded-lg shadow block" data-decision-id="${decision.id}" data-decision-user-id="${decision.user.id}">
-            <h3 class="text-xl font-bold mb-2">${decision.title}</h3>
-            <p class="text-gray-600 mb-2">
-                <strong>描述：</strong> ${decision.description} |
-                <strong>类型：</strong> ${decision.decisionCategory} |
-                <strong>状态：</strong> ${decision.decisionStatus}
-            </p>
-            <p class="text-gray-700 mb-4">
-                <strong>作者：</strong> ${decision.user.name} (${decision.user.roles[0].name})
-            </p>
-            <p class="text-gray-600 mb-2">
-                <strong>评分：</strong> ${decision.rate.toFixed(2)}/10<br>
-                <strong>评分数量：</strong> ${decision.expertEvaluations.length}
-            </p>
-        </a>
-    `;
-    container.insertAdjacentHTML('beforeend', html);
-});
-function recommendMethod() {
-    fetch(`http://localhost:8080/api/v1/tasks/${taskId}/recommend-method`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(res => res.text())
-        .then(method => {
-            const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50";
-            modal.innerHTML = `
-                <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
-                    <h2 class="text-2xl font-bold mb-4">推荐方法</h2>
-                    <p class="text-lg mb-6">基于任务特征，推荐使用以下方法：</p>
-                    <p class="text-3xl font-extrabold text-blue-600">${method}</p>
-                    <div class="mt-6">
-                        <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded" onclick="this.closest('.fixed').remove()">关闭</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        })
-        .catch(error => {
-            console.error('错误 推荐方法:', error);
-            alert('无法获取推荐。');
-        });
 }
