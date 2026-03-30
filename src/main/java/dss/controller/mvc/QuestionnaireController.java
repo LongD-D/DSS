@@ -18,6 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Controller
+@AllArgsConstructor
 public class QuestionnaireController {
 
     private final QuestionnaireDataService questionnaireDataService;
