@@ -45,6 +45,13 @@ public class AHPServiceImpl implements AHPService {
     @Override
     public AHPAnalysisResultDto evaluateTask(Task task, AHPAnalysisRequestDto requestDto) {
         List<TaskParameter> parameters = task.getTaskParameters();
+        if (parameters == null || parameters.isEmpty()) {
+            throw new IllegalArgumentException("任务未配置评价指标");
+        }
+        if (task.getDecisions() == null || task.getDecisions().isEmpty()) {
+            throw new IllegalArgumentException("任务下不存在候选技术");
+        }
+
         Map<String, List<TaskParameter>> grouped = parameters.stream()
                 .collect(Collectors.groupingBy(
                         p -> Optional.ofNullable(p.getParentCriterion()).orElse("默认一级指标"),
@@ -52,8 +59,8 @@ public class AHPServiceImpl implements AHPService {
                         Collectors.toList()
                 ));
 
-        MatrixResult primaryResult = calculateMatrixResult(requestDto.getPrimaryMatrix());
         List<String> primaryNames = new ArrayList<>(grouped.keySet());
+        MatrixResult primaryResult = calculatePrimaryMatrixResult(requestDto, primaryNames.size());
 
         Map<String, Double> finalCriteriaWeights = new LinkedHashMap<>();
         Map<String, AHPAnalysisResultDto.ConsistencyResultDto> consistency = new LinkedHashMap<>();
@@ -137,6 +144,9 @@ public class AHPServiceImpl implements AHPService {
     private MatrixResult calculateMatrixResult(List<List<Double>> listMatrix) {
         double[][] matrix = toArray(listMatrix);
         int n = matrix.length;
+        if (n == 0) {
+            return new MatrixResult(new double[0], 0.0, 0.0);
+        }
         double[][] normalized = normalizeComparisonMatrix(matrix);
         double[] weights = calculateWeights(normalized);
 
@@ -160,12 +170,28 @@ public class AHPServiceImpl implements AHPService {
         int size = listMatrix == null ? 0 : listMatrix.size();
         double[][] matrix = new double[size][size];
         for (int i = 0; i < size; i++) {
+            if (listMatrix.get(i) == null || listMatrix.get(i).size() != size) {
+                throw new IllegalArgumentException("判断矩阵必须是方阵");
+            }
             for (int j = 0; j < size; j++) {
                 Double value = listMatrix.get(i).get(j);
                 matrix[i][j] = (value == null || value <= 0) ? 1.0 : value;
             }
         }
         return matrix;
+    }
+
+    private MatrixResult calculatePrimaryMatrixResult(AHPAnalysisRequestDto requestDto, int primarySize) {
+        if (primarySize == 1) {
+            return new MatrixResult(new double[]{1.0}, 0.0, 0.0);
+        }
+        if (requestDto == null || requestDto.getPrimaryMatrix() == null || requestDto.getPrimaryMatrix().isEmpty()) {
+            return equalWeight(primarySize);
+        }
+        if (requestDto.getPrimaryMatrix().size() != primarySize) {
+            throw new IllegalArgumentException("一级指标判断矩阵维度与一级指标数量不一致");
+        }
+        return calculateMatrixResult(requestDto.getPrimaryMatrix());
     }
 
     private List<List<Double>> toList(double[][] matrix) {

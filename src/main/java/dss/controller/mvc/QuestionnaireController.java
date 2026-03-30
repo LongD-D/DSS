@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class QuestionnaireController {
 
-    @AllArgsConstructor
     private final QuestionnaireDataService questionnaireDataService;
 
     private static final int DEFAULT_DRAW_COUNT = 8;

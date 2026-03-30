@@ -102,7 +102,7 @@
                 <tr th:each="parameter : ${decision.decisionParameters}">
                     <td class="p-2 border" th:text="${parameter.taskParameter.name}"></td>
                     <td class="p-2 border" th:text="${parameter.value + ' ' + parameter.taskParameter.unit}"></td>
-                    <td class="p-2 border" th:text="${parameter.comment}"></td>\
+                    <td class="p-2 border" th:text="${parameter.comment}"></td>
                 </tr>
                 </tbody>
             </table>
@@ -113,7 +113,7 @@
                 <strong>评分数量：</strong> <span th:text="${decision.getExpertEvaluations().size()}"></span>
 
             </p>
-        </d>
+        </div>
     </div>
 </div>
 
@@ -127,12 +127,8 @@
                     <p>方法 层次分析 可通过成对比较矩阵对准则和备选候选前沿技术进行两两比较。当存在大量主观评价或不确定数据时很有用。</p>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-lg text-purple-700">TOPSIS (Technique for Order Preference by Similarity to Ideal Solution)</h3>
-                    <p>方法, 用于选择最接近理想（最佳）且最远离最差候选前沿技术的备选项。在数值型准则明确且参数较多时效果很好。</p>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-lg text-emerald-700">ELECTRE (ELimination Et Choix Traduisant la REalité)</h3>
-                    <p>方法 偏好方法，基于备选候选前沿技术比较并设置一致/不一致阈值。当难以将所有准则合并为单一数值且需要折中选择时适用。</p>
+                    <h3 class="font-semibold text-lg text-purple-700">说明</h3>
+                    <p>当前“分析与评价”流程仅开放 AHP 方法进行计算与排序。</p>
                 </div>
             </div>
             <div class="flex justify-center mt-6">
@@ -216,8 +212,8 @@
         const token = localStorage.getItem('token');
 
         if (token) {
-            document.getElementById('nav-login')?.classList.add('hidden');
-            document.getElementById('nav-logout')?.classList.remove('hidden');
+            document.getElementById('login-link')?.classList.add('hidden');
+            document.getElementById('logout-link')?.classList.remove('hidden');
 
             fetch('/api/v1/auth/user', {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -226,8 +222,8 @@
                 .then(user => {
                     const roles = user.roles.map(r => r.name);
                     if (roles.includes('ROLE_ADMIN')) {
-                        document.getElementById('nav-role')?.classList.remove('hidden');
-                        document.getElementById('nav-users')?.classList.remove('hidden');
+                        document.getElementById('role-link')?.classList.remove('hidden');
+                        document.getElementById('users-link')?.classList.remove('hidden');
                     }
                 })
                 .catch(() => {
@@ -236,7 +232,7 @@
                 });
         }
 
-        document.getElementById('nav-logout')?.addEventListener('click', () => {
+        document.getElementById('logout-link')?.addEventListener('click', () => {
             localStorage.removeItem('token');
             window.location.href = '/login';
         });
