@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>技术模块后台管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
+
+        <nav class="flex items-center gap-6 text-gray-700 font-semibold">
+            <a href="/tasks" class="hover:text-blue-600">任务</a>
+            <a href="/decisions" class="hover:text-blue-600">技术</a>
+            <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
+            <a href="/technologies/admin" id="tech-admin-link" class="hover:text-blue-600 hidden">技术后台</a>
+            <a href="/questionnaire/admin" id="question-admin-link" class="hover:text-blue-600 hidden">问卷后台</a>
+            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
+            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
+        </nav>
+    </div>
+</header>
+
+<main id="admin-section" class="max-w-7xl mx-auto p-6 hidden">
+    <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h1 class="text-2xl font-bold">技术模块后台管理</h1>
+        <p class="text-gray-500 mt-2">用于统一查看与删除候选技术（方案）。</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-4 overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+            <tr class="border-b text-left">
+                <th class="p-3">ID</th>
+                <th class="p-3">标题</th>
+                <th class="p-3">状态</th>
+                <th class="p-3">作者</th>
+                <th class="p-3">创建时间</th>
+                <th class="p-3">操作</th>
+            </tr>
+            </thead>
+            <tbody id="decision-body"></tbody>
+        </table>
+    </div>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        window.location.href = '/login';
+    }
+
+    fetch('/api/v1/auth/user', { headers: { 'Authorization': `Bearer ${token}` } })
+        .then(res => res.ok ? res.json() : Promise.reject())
+        .then(user => {
+            const roles = user.roles.map(r => r.name);
+            const isAdmin = roles.includes('ROLE_ADMIN');
+            if (!isAdmin) {
+                alert('您无权访问技术后台。');
+                window.location.href = '/decisions';
+                return;
+            }
+
+            document.getElementById('admin-section').classList.remove('hidden');
+            document.getElementById('question-admin-link').classList.remove('hidden');
+            document.getElementById('tech-admin-link').classList.remove('hidden');
+            document.getElementById('users-link').classList.remove('hidden');
+            document.getElementById('login-link').classList.add('hidden');
+            document.getElementById('logout-link').classList.remove('hidden');
+
+            loadDecisions();
+        })
+        .catch(() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        });
+
+    function loadDecisions() {
+        fetch('/api/v1/decisions/admin/all', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+                const body = document.getElementById('decision-body');
+                body.innerHTML = '';
+
+                if (!data.length) {
+                    body.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">暂无候选技术记录</td></tr>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b';
+                    row.innerHTML = `
+                        <td class="p-3">${item.id}</td>
+                        <td class="p-3"><a href="/decisions/${item.id}" class="text-blue-600 hover:underline">${item.title || '-'}</a></td>
+                        <td class="p-3">${item.decisionStatus || '-'}</td>
+                        <td class="p-3">${item.user?.name || '-'}</td>
+                        <td class="p-3">${item.created ? new Date(item.created).toLocaleString() : '-'}</td>
+                        <td class="p-3">
+                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded" onclick="deleteDecision(${item.id})">删除</button>
+                        </td>
+                    `;
+                    body.appendChild(row);
+                });
+            })
+            .catch(() => alert('加载技术模块记录失败'));
+    }
+
+    function deleteDecision(id) {
+        if (!confirm(`确定删除技术记录 #${id} 吗？`)) {
+            return;
+        }
+
+        fetch(`/api/v1/decisions/admin/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('delete failed');
+                }
+                loadDecisions();
+            })
+            .catch(() => alert('删除失败'));
+    }
+
+    document.getElementById('logout-link').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    });
+</script>
+</body>
+</html>
