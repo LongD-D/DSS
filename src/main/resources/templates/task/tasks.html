@@ -17,6 +17,8 @@
             <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
             <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
             <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
+            <a href="/technologies/admin" id="tech-admin-link" class="hover:text-blue-600 hidden">技术后台</a>
+            <a href="/questionnaire/admin" id="questionnaire-admin-link" class="hover:text-blue-600 hidden">问卷后台</a>
             <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
             <a href="/logout" id="logout-link" class="hover:text-red-600 hidden"> 退出</a>
         </nav>
@@ -124,6 +126,8 @@
                 if (roles.includes('ROLE_ADMIN')) {
                     document.getElementById('role-link')?.classList.remove('hidden');
                     document.getElementById('users-link')?.classList.remove('hidden');
+                    document.getElementById('tech-admin-link')?.classList.remove('hidden');
+                    document.getElementById('questionnaire-admin-link')?.classList.remove('hidden');
                 }
             })
             .catch(() => {

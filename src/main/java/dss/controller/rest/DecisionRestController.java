@@ -126,4 +126,33 @@ public class DecisionRestController {
         return ResponseEntity.ok().build();
     }
 
+
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<Decision>> getAllForAdmin(Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(decisionService.getAllDecisions());
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteDecisionForAdmin(@PathVariable Long id,
+                                                       Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        if (!decisionRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        decisionRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        User user = userService.findUserByEmail(authentication.getName());
+        return user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getName()));
+    }
+
 }
