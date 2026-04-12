@@ -18,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -189,5 +190,13 @@ public class DecisionServiceImpl implements DecisionService {
     @Override
     public List<Decision> findAllDecisionsByAuthUser(Authentication authentication){
         return decisionRepository.findAllByUser(userRepository.findByEmail(authentication.getName()));
+    }
+
+    @Override
+    public List<Decision> findAllRelatedDecisions(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName());
+        return decisionRepository.findAllByTaskUserOrUser(user, user).stream()
+                .sorted(Comparator.comparing(Decision::getCreated).reversed())
+                .toList();
     }
 }

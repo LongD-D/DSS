@@ -54,6 +54,11 @@ public class DecisionRestController {
         return ResponseEntity.ok(decisions);
     }
 
+    @GetMapping("related")
+    public ResponseEntity<List<Decision>> getRelatedDecisions(Authentication auth) {
+        return ResponseEntity.ok(decisionService.findAllRelatedDecisions(auth));
+    }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

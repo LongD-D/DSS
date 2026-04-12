@@ -38,4 +38,6 @@ public interface DecisionService {
     Decision updateStatus(Long id, DecisionStatus decisionStatus, Authentication authentication);
 
     List<Decision> findAllDecisionsByAuthUser(Authentication authentication);
+
+    List<Decision> findAllRelatedDecisions(Authentication authentication);
 }
