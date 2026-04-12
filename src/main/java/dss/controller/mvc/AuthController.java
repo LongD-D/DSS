@@ -30,9 +30,9 @@ public class AuthController {
 
 
     // handler method to handle home page request
-    @GetMapping("/index")
+    @GetMapping({"/", "/index"})
     public String home(){
-        return "index";
+        return "redirect:/login";
     }
 
     // handler method to handle login request
