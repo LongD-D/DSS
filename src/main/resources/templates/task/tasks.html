@@ -12,13 +12,10 @@
         <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
 
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/tasks" class="hover:text-blue-600">分析与评价</a>
-            <a href="/decisions" class="hover:text-blue-600">决策</a>
+            <a href="/analyst/dashboard" class="hover:text-blue-600">分析员工作台</a>
+            <a href="/tasks" class="hover:text-blue-600">技术分析</a>
             <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
-            <a href="/technologies/admin" id="tech-admin-link" class="hover:text-blue-600 hidden">技术后台</a>
-            <a href="/questionnaire/admin" id="questionnaire-admin-link" class="hover:text-blue-600 hidden">问卷后台</a>
+            <a href="/admin/dashboard" id="admin-link" class="hover:text-blue-600 hidden">管理员后台</a>
             <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
             <a href="/logout" id="logout-link" class="hover:text-red-600 hidden"> 退出</a>
         </nav>
@@ -30,19 +27,19 @@
 
     <!-- 筛选表单 -->
     <form method="get" th:action="@{/tasks}" class="mb-6 flex flex-wrap justify-center gap-4">
-        <select name="category" class="border rounded px-4 py-2">
+        <select id="filter-category" name="category" class="border rounded px-4 py-2">
             <option value="">全部类别</option>
             <option value="ENERGETIC" th:selected="${param.category == 'ENERGETIC'}">能源</option>
             <option value="ECONOMY" th:selected="${param.category == 'ECONOMY'}">经济</option>
             <option value="ECOLOGY" th:selected="${param.category == 'ECOLOGY'}"> 生态</option>
         </select>
-        <select name="status" class="border rounded px-4 py-2">
+        <select id="filter-status" name="status" class="border rounded px-4 py-2">
             <option value="">全部状态</option>
             <option value="NEW" th:selected="${param.status == 'NEW'}">新建</option>
             <option value="SOLVED" th:selected="${param.status == 'SOLVED'}">已解决</option>
             <option value="EMERGENCY" th:selected="${param.status == 'EMERGENCY'}">紧急</option>
         </select>
-        <input type="text" name="user" placeholder="按姓名搜索" class="border rounded px-4 py-2" th:value="${param.user}">
+        <input id="filter-user" type="text" name="user" placeholder="按姓名搜索" class="border rounded px-4 py-2" th:value="${param.user}">
         <select name="sort" class="border rounded px-4 py-2">
             <option value="">排序</option>
             <option value="created-desc" th:selected="${param.sort == 'created-desc'}">最新优先</option>
@@ -123,11 +120,15 @@
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(user => {
                 const roles = user.roles.map(r => r.name);
-                if (roles.includes('ROLE_ADMIN')) {
-                    document.getElementById('role-link')?.classList.remove('hidden');
-                    document.getElementById('users-link')?.classList.remove('hidden');
-                    document.getElementById('tech-admin-link')?.classList.remove('hidden');
-                    document.getElementById('questionnaire-admin-link')?.classList.remove('hidden');
+                const isAdmin = roles.includes('ROLE_ADMIN');
+                const isAnalyst = roles.includes('ANALYST');
+
+                if (isAdmin) {
+                    document.getElementById('admin-link')?.classList.remove('hidden');
+                }
+
+                if (!isAdmin && !isAnalyst) {
+                    window.location.href = '/analyst/dashboard';
                 }
             })
             .catch(() => {
