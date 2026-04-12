@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员后台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+<header class="bg-white shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="/admin/dashboard" class="text-2xl font-bold text-blue-600">DSS 管理后台</a>
+        <div class="flex items-center gap-4">
+            <a href="/analyst/dashboard" class="text-sm text-blue-600 hover:underline">切换到分析员视图</a>
+            <button id="logout-link" class="text-red-600 hover:text-red-700 font-semibold">退出</button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">管理员控制台</h1>
+    <p class="text-gray-600 mb-8">仅管理员可见：用户权限、系统信息与后台配置。</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <a href="/users" class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">用户权限管理</h2>
+            <p class="text-gray-600">查看用户、调整角色、删除用户账号。</p>
+        </a>
+        <a href="/roles" class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">角色管理</h2>
+            <p class="text-gray-600">维护系统角色与权限分配策略。</p>
+        </a>
+        <a href="/technologies/admin" class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">技术后台信息</h2>
+            <p class="text-gray-600">维护技术评估的基础信息与后台数据。</p>
+        </a>
+        <a href="/questionnaire/admin" class="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
+            <h2 class="text-xl font-semibold text-gray-800 mb-2">问卷后台信息</h2>
+            <p class="text-gray-600">查看问卷维度结果并进行管理。</p>
+        </a>
+    </div>
+</main>
+
+<script>
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        window.location.href = '/login';
+    } else {
+        fetch('/api/v1/auth/user', {
+            headers: {'Authorization': `Bearer ${token}`}
+        })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(user => {
+                const roles = user.roles.map(r => r.name);
+                if (!roles.includes('ROLE_ADMIN')) {
+                    window.location.href = '/analyst/dashboard';
+                }
+            })
+            .catch(() => {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            });
+    }
+
+    document.getElementById('logout-link').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    });
+</script>
+</body>
+</html>
