@@ -8,16 +8,11 @@
 <body class="bg-gray-100 min-h-screen pt-20 px-6">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS | 我的 方案</a>
+        <a href="/analyst/dashboard" class="text-2xl font-bold text-blue-600">DSS | 我的 方案</a>
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
             <a href="/tasks" class="hover:text-blue-600">分析与评价</a>
             <a href="/decisions" class="hover:text-blue-600">方案</a>
-            <a href="/roles" id="role-link" class="hover:text-blue-600 hidden">角色</a>
-            <a href="/users" id="users-link" class="hover:text-blue-600 hidden">用户</a>
-            <a href="/technologies/admin" id="tech-admin-link" class="hover:text-blue-600 hidden">技术后台</a>
-            <a href="/questionnaire/admin" id="questionnaire-admin-link" class="hover:text-blue-600 hidden">问卷后台</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600">登录</a>
-            <a href="#" id="logout-link" class="hover:text-red-600 hidden">退出</a>
+            <a href="#" id="logout-link" class="hover:text-red-600">退出</a>
         </nav>
     </div>
 </header>
@@ -30,28 +25,9 @@
 <script>
     const token = localStorage.getItem('token');
 
-    if (token) {
-        document.getElementById('login-link')?.classList.add('hidden');
-        document.getElementById('logout-link')?.classList.remove('hidden');
-
-        fetch('/api/v1/auth/user', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.ok ? res.json() : Promise.reject())
-            .then(user => {
-                const roles = user.roles.map(r => r.name);
-                if (roles.includes('ROLE_ADMIN')) {
-                    document.getElementById('role-link')?.classList.remove('hidden');
-                    document.getElementById('users-link')?.classList.remove('hidden');
-                    document.getElementById('tech-admin-link')?.classList.remove('hidden');
-                    document.getElementById('questionnaire-admin-link')?.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            });
-
+    if (!token) {
+        window.location.href = '/login';
+    } else {
         fetch('/api/v1/decisions/my', {
             method: 'GET',
             headers: {
