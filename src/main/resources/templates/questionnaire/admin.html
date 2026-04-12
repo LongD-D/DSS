@@ -38,6 +38,7 @@
                 <th class="p-3">经济性</th>
                 <th class="p-3">生态影响</th>
                 <th class="p-3">法规适配</th>
+                <th class="p-3">标记</th>
             </tr>
             </thead>
             <tbody id="submission-body"></tbody>
@@ -81,7 +82,7 @@
                 body.innerHTML = '';
 
                 if (!data.length) {
-                    body.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">暂无提交记录</td></tr>';
+                    body.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">暂无提交记录</td></tr>';
                     return;
                 }
 
@@ -91,15 +92,27 @@
                     row.className = 'border-b';
                     row.innerHTML = `
                         <td class="p-3">${new Date(item.submittedAt).toLocaleString()}</td>
-                        <td class="p-3">${formatScore(d['技术成熟度'])}</td>
-                        <td class="p-3">${formatScore(d['经济性'])}</td>
-                        <td class="p-3">${formatScore(d['生态影响'])}</td>
-                        <td class="p-3">${formatScore(d['法规适配'])}</td>
+                        <td class="p-3">${formatScore(getDimensionValue(d, '技术成熟度'))}</td>
+                        <td class="p-3">${formatScore(getDimensionValue(d, '经济性'))}</td>
+                        <td class="p-3">${formatScore(getDimensionValue(d, '生态影响'))}</td>
+                        <td class="p-3">${formatScore(getDimensionValue(d, '法规适配'))}</td>
+                        <td class="p-3">${isTestSubmission(d) ? '<span class=\"text-orange-600 font-semibold\">测试信息</span>' : '-'}</td>
                     `;
                     body.appendChild(row);
                 });
             })
             .catch(() => alert('加载问卷提交记录失败'));
+    }
+
+
+    function getDimensionValue(map, baseKey) {
+        if (map[baseKey] !== undefined) return map[baseKey];
+        const key = Object.keys(map).find(k => k.startsWith(baseKey));
+        return key ? map[key] : null;
+    }
+
+    function isTestSubmission(map) {
+        return Object.keys(map).some(k => k.includes('测试信息'));
     }
 
     function formatScore(score) {

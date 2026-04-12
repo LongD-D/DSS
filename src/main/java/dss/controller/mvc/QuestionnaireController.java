@@ -1,8 +1,11 @@
 package dss.controller.mvc;
 
+import dss.dto.QuestionnaireAnswerInputDto;
 import dss.service.QuestionnaireDataService;
+import dss.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class QuestionnaireController {
 
     private final QuestionnaireDataService questionnaireDataService;
+    private final UserService userService;
 
     private static final int DEFAULT_DRAW_COUNT = 8;
 
@@ -49,7 +53,7 @@ public class QuestionnaireController {
     }
 
     @PostMapping("/questionnaire/submit")
-    public String submit(@RequestParam Map<String, String> formData, Model model) {
+    public String submit(@RequestParam Map<String, String> formData, Model model, Authentication authentication) {
         List<QuestionAnswerResult> answers = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : formData.entrySet()) {
@@ -62,7 +66,7 @@ public class QuestionnaireController {
             QuestionItem question = findQuestion(questionId);
 
             if (question != null) {
-                answers.add(new QuestionAnswerResult(question.getDimension(), question.getText(), score));
+                answers.add(new QuestionAnswerResult(question.getId(), question.getDimension(), question.getText(), score));
             }
         }
 
@@ -80,7 +84,21 @@ public class QuestionnaireController {
                         Collectors.averagingInt(QuestionAnswerResult::getScore)
                 ));
 
-        questionnaireDataService.recordSubmission(dimensionAverage);
+        var answersForStore = answers.stream()
+                .map(answer -> new QuestionnaireAnswerInputDto(
+                        answer.getQuestionId(),
+                        answer.getDimension(),
+                        answer.getQuestionText(),
+                        answer.getScore()
+                ))
+                .toList();
+
+        questionnaireDataService.recordSubmission(
+                userService.findUserByEmail(authentication.getName()),
+                overallAverage,
+                answersForStore,
+                dimensionAverage
+        );
 
         model.addAttribute("overallAverage", overallAverage);
         model.addAttribute("dimensionAverage", dimensionAverage);
@@ -100,6 +118,7 @@ public class QuestionnaireController {
         return shuffled.subList(0, Math.min(count, shuffled.size()));
     }
 
+
     private QuestionItem findQuestion(Long id) {
         return QUESTION_BANK.stream()
                 .filter(q -> q.getId().equals(id))
@@ -118,6 +137,7 @@ public class QuestionnaireController {
     @Getter
     @AllArgsConstructor
     private static class QuestionAnswerResult {
+        private Long questionId;
         private String dimension;
         private String questionText;
         private Integer score;

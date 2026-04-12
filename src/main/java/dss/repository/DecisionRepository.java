@@ -21,6 +21,8 @@ public interface DecisionRepository extends JpaRepository<Decision, Long> {
     Decision findById(long id);
     void deleteById(long id);
     List<Decision> findAllByTask(Task task);
+    List<Decision> findAllByTaskUserOrUser(User taskUser, User user);
+
     List<Decision> findAllByTask(Task task, Pageable pageable);
 
     Decision findByIdAndUser(Long id, User user);

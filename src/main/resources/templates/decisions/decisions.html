@@ -2,13 +2,13 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>我的 方案</title>
+    <title>决策分析</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen pt-20 px-6">
 <header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/analyst/dashboard" class="text-2xl font-bold text-blue-600">DSS | 我的 方案</a>
+        <a href="/analyst/dashboard" class="text-2xl font-bold text-blue-600">DSS | 决策分析</a>
         <nav class="flex items-center gap-6 text-gray-700 font-semibold">
             <a href="/analyst/dashboard" class="hover:text-blue-600">分析员工作台</a>
             <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
@@ -19,9 +19,16 @@
     </div>
 </header>
 
-<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-2xl font-bold mb-6">我的 方案</h1>
-    <ul id="my-decisions-list" class="space-y-4"></ul>
+<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow space-y-8">
+    <section>
+        <h1 class="text-2xl font-bold mb-6">相关方案（我的任务 + 我创建的方案）</h1>
+        <ul id="my-decisions-list" class="space-y-4"></ul>
+    </section>
+
+    <section>
+        <h2 class="text-xl font-bold mb-4">我的技术任务（尚未创建方案）</h2>
+        <ul id="tasks-without-decision" class="space-y-3"></ul>
+    </section>
 </div>
 
 <script>
@@ -30,17 +37,27 @@
     if (!token) {
         window.location.href = '/login';
     } else {
-        fetch('/api/v1/decisions/my', {
+        loadRelatedDecisions();
+        loadMyTasksWithoutDecision();
+    }
+
+    function loadRelatedDecisions() {
+        fetch('/api/v1/decisions/related', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
         })
-            .then(res => res.json())
+            .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 const list = document.getElementById('my-decisions-list');
                 list.innerHTML = '';
+
+                if (!data.length) {
+                    list.innerHTML = '<li class="p-4 bg-yellow-50 border rounded text-yellow-800">当前没有可查看的方案，请先在“技术分析”中创建任务并新增方案。</li>';
+                    return;
+                }
 
                 data.forEach(decision => {
                     const item = document.createElement('li');
@@ -49,20 +66,55 @@
                     <a href="/decisions/${decision.id}" class="text-blue-600 hover:underline text-lg font-medium">
                         ${decision.title || '方案 #' + decision.id}
                     </a>
-                    <p class="text-sm text-gray-700 mt-1">${decision.description}</p>
-                    <p class="text-sm text-gray-600">类别： ${decision.decisionCategory} | 创建于: ${decision.created}</p>
-                    <p class="text-sm text-gray-500">作者： ${decision.user.name}</p>
+                    <p class="text-sm text-gray-700 mt-1">${decision.description || '-'}</p>
+                    <p class="text-sm text-gray-600">类别： ${decision.decisionCategory || '-'} | 创建于: ${decision.created ? new Date(decision.created).toLocaleString() : '-'}</p>
+                    <p class="text-sm text-gray-500">作者： ${decision.user?.name || '-'}</p>
                 `;
                     list.appendChild(item);
                 });
             })
             .catch(error => {
-                console.error('错误： 加载 方案:', error);
-                alert('无法获取列表 方案.');
+                console.error('错误：加载方案失败', error);
+                alert('无法获取决策分析列表。');
             });
     }
 
-    // Logout handler
+    function loadMyTasksWithoutDecision() {
+        Promise.all([
+            fetch('/api/v1/auth/user', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : Promise.reject()),
+            fetch('/api/v1/tasks', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.ok ? res.json() : Promise.reject())
+        ])
+            .then(([user, tasks]) => {
+                const list = document.getElementById('tasks-without-decision');
+                list.innerHTML = '';
+
+                const emptyTasks = (tasks || []).filter(task => task?.user?.id === user.id && (!task.decisions || task.decisions.length === 0));
+
+                if (!emptyTasks.length) {
+                    list.innerHTML = '<li class="text-gray-500">暂无“未创建方案”的技术任务。</li>';
+                    return;
+                }
+
+                emptyTasks.forEach(task => {
+                    const item = document.createElement('li');
+                    item.className = 'p-3 bg-blue-50 border border-blue-100 rounded';
+                    item.innerHTML = `
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-gray-800">${task.title}</p>
+                                <p class="text-sm text-gray-600">任务ID: ${task.id}</p>
+                            </div>
+                            <a href="/decisions/create?taskId=${task.id}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 rounded">为该任务创建方案</a>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            })
+            .catch(error => {
+                console.error('错误：加载任务失败', error);
+            });
+    }
+
     document.getElementById('logout-link')?.addEventListener('click', () => {
         localStorage.removeItem('token');
         window.location.href = '/login';
