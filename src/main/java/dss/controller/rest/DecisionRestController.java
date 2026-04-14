@@ -1,6 +1,7 @@
 package dss.controller.rest;
 
 import dss.dto.DecisionDto;
+import dss.dto.DecisionImportResponseDto;
 import dss.dto.ExpertEvaluationDto;
 import dss.dto.ScenarioDto;
 import dss.dto.StatusUpdateRequest;
@@ -20,6 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 import java.util.List;
 import java.util.Optional;
@@ -138,6 +142,22 @@ public class DecisionRestController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(decisionService.getAllDecisions());
+    }
+
+
+    @PostMapping("/admin/import")
+    public ResponseEntity<?> importDecisions(@RequestParam("file") MultipartFile file,
+                                             Authentication authentication) {
+        if (!isAdmin(authentication)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            DecisionImportResponseDto response = decisionService.importDecisionsFromCsv(file, authentication);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        }
     }
 
     @DeleteMapping("/admin/{id}")

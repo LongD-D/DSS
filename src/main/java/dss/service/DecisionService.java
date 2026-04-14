@@ -1,6 +1,7 @@
 package dss.service;
 
 import dss.dto.DecisionDto;
+import dss.dto.DecisionImportResponseDto;
 import dss.dto.ExpertEvaluationDto;
 import dss.dto.ScenarioDto;
 import dss.model.entity.Decision;
@@ -9,6 +10,7 @@ import dss.model.entity.User;
 import dss.model.entity.enums.DecisionStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,4 +42,6 @@ public interface DecisionService {
     List<Decision> findAllDecisionsByAuthUser(Authentication authentication);
 
     List<Decision> findAllRelatedDecisions(Authentication authentication);
+
+    DecisionImportResponseDto importDecisionsFromCsv(MultipartFile file, Authentication authentication);
 }
