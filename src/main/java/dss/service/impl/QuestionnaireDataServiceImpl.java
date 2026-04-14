@@ -10,6 +10,7 @@ import dss.model.entity.QuestionnaireQuestionBank;
 import dss.model.entity.QuestionnaireSubmission;
 import dss.model.entity.User;
 import dss.repository.QuestionnaireQuestionBankRepository;
+import dss.repository.QuestionnaireQuestionRepository;
 import dss.repository.QuestionnaireSubmissionRepository;
 import dss.service.QuestionnaireDataService;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +38,7 @@ public class QuestionnaireDataServiceImpl implements QuestionnaireDataService {
 
     private final QuestionnaireSubmissionRepository submissionRepository;
     private final QuestionnaireQuestionBankRepository questionBankRepository;
+    private final QuestionnaireQuestionRepository questionRepository;
 
     @Override
     @Transactional
@@ -130,6 +133,29 @@ public class QuestionnaireDataServiceImpl implements QuestionnaireDataService {
 
         QuestionnaireQuestionBank saved = questionBankRepository.save(bank);
         return toBankSummary(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QuestionnaireQuestion> getEffectiveQuestions(Optional<Long> selectedBankId) {
+        Optional<QuestionnaireQuestionBank> effectiveBank = selectedBankId
+                .flatMap(questionBankRepository::findById)
+                .or(() -> questionBankRepository.findTopByOrderByImportedAtDesc());
+
+        if (effectiveBank.isEmpty()) {
+            return List.of();
+        }
+
+        return questionRepository.findAllByBankId(effectiveBank.get().getId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<QuestionnaireQuestion> findQuestionById(Long questionId) {
+        if (questionId == null) {
+            return Optional.empty();
+        }
+        return questionRepository.findById(questionId);
     }
 
     private void validateCsvFile(MultipartFile file) {

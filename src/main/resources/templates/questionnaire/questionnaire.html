@@ -22,12 +22,12 @@
 <div class="max-w-5xl mx-auto pt-24">
     <div class="bg-white rounded-xl shadow p-6 mb-6">
         <h1 class="text-3xl font-bold text-center">德尔菲调查问卷</h1>
-        <p class="text-center text-gray-600 mt-2">本次问卷从固定题库中随机抽取题目，请根据 1-5 分标准进行评分（1=非常不同意，5=非常同意）。</p>
+        <p class="text-center text-gray-600 mt-2">本次问卷将从当前有效题库中随机抽取题目，请根据 1-5 分标准进行评分（1=非常不同意，5=非常同意）。</p>
     </div>
 
     <div th:if="${errorMessage}" class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded mb-4" th:text="${errorMessage}"></div>
 
-    <form method="post" th:action="@{/questionnaire/submit}" class="space-y-4">
+    <form th:if="${!#lists.isEmpty(questions)}" method="post" th:action="@{/questionnaire/submit}" class="space-y-4">
         <input type="hidden" name="token" id="jwt-token-field">
         <div th:each="question, stat : ${questions}" class="bg-white rounded-xl shadow p-5">
             <p class="text-sm font-semibold text-blue-600 mb-2" th:text="'维度：' + ${question.dimension}"></p>
@@ -50,6 +50,10 @@
             </button>
         </div>
     </form>
+
+    <div th:if="${#lists.isEmpty(questions)}" class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded">
+        当前没有可作答题目。请管理员先导入题库CSV，然后再刷新页面。
+    </div>
 </div>
 <script>
     const token = localStorage.getItem('token');
