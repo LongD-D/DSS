@@ -26,6 +26,16 @@
         <p class="text-gray-500 mt-2">用于统一查看与删除候选技术（方案）。</p>
     </div>
 
+    <div class="bg-white rounded-lg shadow p-4 mb-4">
+        <h2 class="text-lg font-semibold mb-3">批量导入技术方案（CSV）</h2>
+        <form id="import-form" class="flex flex-col md:flex-row gap-3 md:items-center">
+            <input id="import-file" type="file" accept=".csv" class="border rounded px-3 py-2" required />
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">上传并导入</button>
+        </form>
+        <p class="text-xs text-gray-500 mt-2">CSV 列建议：task_id,title,description,decision_category,decision_status,parameter_name,parameter_value,parameter_comment</p>
+        <div id="import-result" class="mt-3 text-sm"></div>
+    </div>
+
     <div class="bg-white rounded-lg shadow p-4 overflow-x-auto">
         <table class="min-w-full text-sm">
             <thead>
@@ -119,6 +129,54 @@
             })
             .catch(() => alert('删除失败'));
     }
+
+
+    document.getElementById('import-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const fileInput = document.getElementById('import-file');
+        const resultEl = document.getElementById('import-result');
+        const file = fileInput.files?.[0];
+
+        if (!file) {
+            resultEl.innerHTML = '<p class="text-red-600">请先选择 CSV 文件。</p>';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        resultEl.innerHTML = '<p class="text-gray-600">正在导入，请稍候...</p>';
+
+        fetch('/api/v1/decisions/admin/import', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        })
+            .then(async res => {
+                const payload = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    throw new Error(payload.message || '导入失败');
+                }
+                return payload;
+            })
+            .then(payload => {
+                const errors = Array.isArray(payload.errors) ? payload.errors : [];
+                const errorItems = errors.map(err => `<li>第 ${err.row} 行：${err.reason}</li>`).join('');
+
+                resultEl.innerHTML = `
+                    <p class="text-green-700 font-medium">${payload.message || '导入完成'}</p>
+                    <p class="text-gray-700">成功：${payload.successCount ?? 0}，失败：${payload.failureCount ?? 0}</p>
+                    ${errorItems ? `<ul class="list-disc pl-5 mt-2 text-red-600">${errorItems}</ul>` : ''}
+                `;
+
+                fileInput.value = '';
+                loadDecisions();
+            })
+            .catch(err => {
+                resultEl.innerHTML = `<p class="text-red-600">${err.message}</p>`;
+            });
+    });
 
     document.getElementById('logout-link').addEventListener('click', () => {
         localStorage.removeItem('token');
