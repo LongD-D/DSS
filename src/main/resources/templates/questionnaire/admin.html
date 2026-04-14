@@ -14,22 +14,50 @@
             <a href="/users" class="hover:text-blue-600">用户管理</a>
             <a href="/roles" class="hover:text-blue-600">角色管理</a>
             <a href="/technologies/admin" class="hover:text-blue-600">技术管理</a>
-            <a href="/questionnaire/admin" class="hover:text-blue-600">问卷管理</a>
+            <a href="/questionnaire/admin" class="text-blue-600">问卷管理</a>
             <a href="#" id="logout-link" class="hover:text-red-600">退出</a>
         </nav>
     </div>
 </header>
 
-<main id="admin-section" class="max-w-6xl mx-auto p-6 hidden">
-    <div class="bg-white rounded-lg shadow p-6 mb-4">
+<main id="admin-section" class="max-w-6xl mx-auto p-6 hidden space-y-6">
+    <div class="bg-white rounded-lg shadow p-6">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-bold">问卷后台管理</h1>
             <button id="clear-btn" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">清空提交记录</button>
         </div>
-        <p class="text-gray-500 mt-2">用于查看问卷提交历史与各维度均分。</p>
+        <p class="text-gray-500 mt-2">用于查看问卷提交历史、题库列表并导入固定 CSV 格式题库。</p>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-4 overflow-x-auto">
+    <section class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">题库管理</h2>
+        <div class="bg-blue-50 border border-blue-200 rounded p-4 text-sm text-blue-800 mb-4">
+            CSV 固定格式要求：第一行为表头 <span class="font-semibold">dimension,question_text</span>，每行两列分别为“维度”和“题目文本”。
+        </div>
+        <form id="import-form" class="flex flex-wrap gap-3 items-center mb-4">
+            <input id="bank-file" type="file" accept=".csv" class="border p-2 rounded bg-white" required>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">导入题库 CSV</button>
+            <p id="import-msg" class="text-sm"></p>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+                <thead>
+                <tr class="border-b text-left">
+                    <th class="p-3">题库ID</th>
+                    <th class="p-3">题库名称</th>
+                    <th class="p-3">来源文件</th>
+                    <th class="p-3">题目数</th>
+                    <th class="p-3">导入时间</th>
+                </tr>
+                </thead>
+                <tbody id="bank-body"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bg-white rounded-lg shadow p-4 overflow-x-auto">
+        <h2 class="text-xl font-semibold p-2">问卷提交记录</h2>
         <table class="min-w-full text-sm">
             <thead>
             <tr class="border-b text-left">
@@ -43,7 +71,7 @@
             </thead>
             <tbody id="submission-body"></tbody>
         </table>
-    </div>
+    </section>
 </main>
 
 <script>
@@ -66,6 +94,7 @@
 
             document.getElementById('admin-section').classList.remove('hidden');
             loadSubmissions();
+            loadQuestionBanks();
         })
         .catch(() => {
             localStorage.removeItem('token');
@@ -96,7 +125,7 @@
                         <td class="p-3">${formatScore(getDimensionValue(d, '经济性'))}</td>
                         <td class="p-3">${formatScore(getDimensionValue(d, '生态影响'))}</td>
                         <td class="p-3">${formatScore(getDimensionValue(d, '法规适配'))}</td>
-                        <td class="p-3">${isTestSubmission(d) ? '<span class=\"text-orange-600 font-semibold\">测试信息</span>' : '-'}</td>
+                        <td class="p-3">${isTestSubmission(d) ? '<span class="text-orange-600 font-semibold">测试信息</span>' : '-'}</td>
                     `;
                     body.appendChild(row);
                 });
@@ -104,6 +133,35 @@
             .catch(() => alert('加载问卷提交记录失败'));
     }
 
+    function loadQuestionBanks() {
+        fetch('/api/v1/questionnaire/admin/question-banks', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.ok ? res.json() : Promise.reject())
+            .then(data => {
+                const body = document.getElementById('bank-body');
+                body.innerHTML = '';
+
+                if (!data.length) {
+                    body.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">暂无题库，请先导入 CSV 文件</td></tr>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b';
+                    row.innerHTML = `
+                        <td class="p-3">${item.id}</td>
+                        <td class="p-3">${item.name}</td>
+                        <td class="p-3">${item.sourceFileName}</td>
+                        <td class="p-3">${item.questionCount}</td>
+                        <td class="p-3">${new Date(item.importedAt).toLocaleString()}</td>
+                    `;
+                    body.appendChild(row);
+                });
+            })
+            .catch(() => alert('加载题库失败'));
+    }
 
     function getDimensionValue(map, baseKey) {
         if (map[baseKey] !== undefined) return map[baseKey];
@@ -136,6 +194,45 @@
                 loadSubmissions();
             })
             .catch(() => alert('清空失败'));
+    });
+
+    document.getElementById('import-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const fileInput = document.getElementById('bank-file');
+        const message = document.getElementById('import-msg');
+        const file = fileInput.files?.[0];
+
+        if (!file) {
+            message.className = 'text-sm text-red-600';
+            message.textContent = '请先选择 CSV 文件。';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch('/api/v1/questionnaire/admin/question-banks/import', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        })
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.message || '导入失败');
+                }
+                return data;
+            })
+            .then(data => {
+                message.className = 'text-sm text-green-600';
+                message.textContent = data.message || '导入成功';
+                fileInput.value = '';
+                loadQuestionBanks();
+            })
+            .catch(err => {
+                message.className = 'text-sm text-red-600';
+                message.textContent = err.message || '导入失败';
+            });
     });
 
     document.getElementById('logout-link').addEventListener('click', () => {
