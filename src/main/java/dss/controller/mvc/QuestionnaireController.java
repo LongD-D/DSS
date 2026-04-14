@@ -1,6 +1,8 @@
 package dss.controller.mvc;
 
 import dss.dto.QuestionnaireAnswerInputDto;
+import dss.model.entity.User;
+import dss.security.jwt.JwtService;
 import dss.service.QuestionnaireDataService;
 import dss.service.UserService;
 import lombok.AllArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import io.jsonwebtoken.JwtException;
 
 @Controller
 @AllArgsConstructor
@@ -26,6 +29,7 @@ public class QuestionnaireController {
 
     private final QuestionnaireDataService questionnaireDataService;
     private final UserService userService;
+    private final JwtService jwtService;
 
     private static final int DEFAULT_DRAW_COUNT = 8;
 
@@ -54,6 +58,14 @@ public class QuestionnaireController {
 
     @PostMapping("/questionnaire/submit")
     public String submit(@RequestParam Map<String, String> formData, Model model, Authentication authentication) {
+        User submitter = resolveSubmitter(authentication, formData.get("token"));
+        if (submitter == null) {
+            model.addAttribute("errorMessage", "提交失败：请先登录后再提交问卷。");
+            model.addAttribute("questions", drawRandomQuestions(DEFAULT_DRAW_COUNT));
+            model.addAttribute("scoreOptions", List.of(1, 2, 3, 4, 5));
+            return "questionnaire/questionnaire";
+        }
+
         List<QuestionAnswerResult> answers = new ArrayList<>();
 
         for (Map.Entry<String, String> entry : formData.entrySet()) {
@@ -94,7 +106,7 @@ public class QuestionnaireController {
                 .toList();
 
         questionnaireDataService.recordSubmission(
-                userService.findUserByEmail(authentication.getName()),
+                submitter,
                 overallAverage,
                 answersForStore,
                 dimensionAverage
@@ -105,6 +117,27 @@ public class QuestionnaireController {
         model.addAttribute("answers", answers);
 
         return "questionnaire/result";
+    }
+
+    private User resolveSubmitter(Authentication authentication, String rawToken) {
+        if (authentication != null && authentication.getName() != null
+                && !"anonymousUser".equals(authentication.getName())) {
+            User user = userService.findUserByEmail(authentication.getName());
+            if (user != null) {
+                return user;
+            }
+        }
+
+        if (rawToken == null || rawToken.isBlank()) {
+            return null;
+        }
+
+        try {
+            String email = jwtService.extractUsername(rawToken);
+            return userService.findUserByEmail(email);
+        } catch (JwtException | IllegalArgumentException ex) {
+            return null;
+        }
     }
 
     private List<QuestionItem> drawRandomQuestions(int count) {
