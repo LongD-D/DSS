@@ -31,5 +31,17 @@ public class ExpertEvaluation {
     @Max(10)
     private double score;
 
+    @Min(0)
+    @Max(1)
+    private Double ca;
+
+    @Min(0)
+    @Max(1)
+    private Double cs;
+
+    @Min(0)
+    @Max(1)
+    private Double c;
+
     private String comment;
 }

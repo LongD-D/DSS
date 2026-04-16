@@ -28,6 +28,9 @@ public class ExpertEvaluationServiceImpl implements ExpertEvaluationService {
         expertEvaluation.setDecision(decisionRepository.findById(expertEvaluationDto.getDecisionId()).get());
         expertEvaluation.setExpert(userService.findUserByEmail(authentication.getName()));
         expertEvaluation.setScore(expertEvaluationDto.getScore());
+        expertEvaluation.setCa(expertEvaluationDto.getCa());
+        expertEvaluation.setCs(expertEvaluationDto.getCs());
+        expertEvaluation.setC(calculateC(expertEvaluationDto.getCa(), expertEvaluationDto.getCs()));
         expertEvaluation.setComment(expertEvaluationDto.getComment());
         return expertEvaluationRepository.save(expertEvaluation);
     }
@@ -42,6 +45,9 @@ public class ExpertEvaluationServiceImpl implements ExpertEvaluationService {
 
         if (found!=null){
             found.setScore(expertEvaluationDto.getScore());
+            found.setCa(expertEvaluationDto.getCa());
+            found.setCs(expertEvaluationDto.getCs());
+            found.setC(calculateC(expertEvaluationDto.getCa(), expertEvaluationDto.getCs()));
             found.setComment(expertEvaluationDto.getComment());
             return expertEvaluationRepository.save(found);
         }
@@ -62,5 +68,12 @@ public class ExpertEvaluationServiceImpl implements ExpertEvaluationService {
             return found;
         }
         return null;
+    }
+
+    private double calculateC(Double ca, Double cs) {
+        if (ca == null || cs == null) {
+            return 0.0;
+        }
+        return (ca + cs) / 2.0;
     }
 }

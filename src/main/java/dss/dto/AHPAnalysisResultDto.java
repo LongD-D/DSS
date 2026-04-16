@@ -16,6 +16,7 @@ public class AHPAnalysisResultDto {
     private Map<String, Double> criteriaWeights;
     private Map<String, ConsistencyResultDto> consistencyByLevel;
     private Map<String, Double> aggregatedExpertScores;
+    private Map<String, List<ExpertWeightDetailDto>> expertWeightDetailsByDecision;
     private Map<String, Double> questionnaireDimensionScores;
     private List<RankedResultDto> ranking;
     /**
@@ -46,5 +47,21 @@ public class AHPAnalysisResultDto {
         private double expertScore;
         private double totalScore;
         private int rank;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ExpertWeightDetailDto {
+        private Long expertId;
+        private String expertName;
+        private double rawScore;
+        private double indicatorWeightedScore;
+        private double ca;
+        private double cs;
+        private double c;
+        private double normalizedExpertWeight;
+        private double weightedContribution;
     }
 }
