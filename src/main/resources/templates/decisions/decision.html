@@ -118,6 +118,9 @@
                 <th class="border p-2">专家</th>
                 <th class="border p-2">角色</th>
                 <th class="border p-2">评分</th>
+                <th class="border p-2">Ca</th>
+                <th class="border p-2">Cs</th>
+                <th class="border p-2">C</th>
                 <th class="border p-2">评论</th>
             </tr>
             </thead>
@@ -126,6 +129,9 @@
                 <td class="border p-2" th:text="${eval.expert.name}"></td>
                 <td class="border p-2" th:each="role : ${eval.expert.roles}" th:text="${role.ukrName}"></td>
                 <td class="border p-2" th:text="${eval.score}"></td>
+                <td class="border p-2" th:text="${eval.ca}"></td>
+                <td class="border p-2" th:text="${eval.cs}"></td>
+                <td class="border p-2" th:text="${eval.c}"></td>
                 <td class="border p-2" th:text="${eval.comment}"></td>
             </tr>
             </tbody>
@@ -139,6 +145,10 @@
         <h2 class="text-xl font-bold mb-4 text-center">评分 方案</h2>
         <label class="block mb-2">评分 (0-10)：</label>
         <input type="number" id="rate-score" class="w-full border p-2 rounded mb-4" min="0" max="10" step="0.1">
+        <label class="block mb-2">判断依据 (Ca)：</label>
+        <select id="rate-ca" class="w-full border p-2 rounded mb-4"></select>
+        <label class="block mb-2">熟悉程度 (Cs)：</label>
+        <select id="rate-cs" class="w-full border p-2 rounded mb-4"></select>
         <label class="block mb-2">评论（可选）：</label>
         <textarea id="rate-comment" class="w-full border p-2 rounded mb-4"></textarea>
         <div class="flex justify-end gap-4">

@@ -330,6 +330,22 @@ function renderAnalysisResult(result) {
         .map(([name, score]) => `<tr><td class="p-2 border">${name}</td><td class="p-2 border">${score.toFixed(4)}</td></tr>`)
         .join('');
 
+    const expertDetailRows = Object.entries(result.expertWeightDetailsByDecision || {})
+        .flatMap(([decisionTitle, details]) => (details || []).map(detail => `
+            <tr>
+                <td class="p-2 border">${decisionTitle}</td>
+                <td class="p-2 border">${detail.expertName || '-'}</td>
+                <td class="p-2 border">${(detail.rawScore || 0).toFixed(2)}</td>
+                <td class="p-2 border">${(detail.indicatorWeightedScore || 0).toFixed(4)}</td>
+                <td class="p-2 border">${(detail.ca || 0).toFixed(2)}</td>
+                <td class="p-2 border">${(detail.cs || 0).toFixed(2)}</td>
+                <td class="p-2 border">${(detail.c || 0).toFixed(2)}</td>
+                <td class="p-2 border">${(detail.normalizedExpertWeight || 0).toFixed(4)}</td>
+                <td class="p-2 border">${(detail.weightedContribution || 0).toFixed(4)}</td>
+            </tr>
+        `))
+        .join('');
+
     const questionnaireRows = Object.entries(result.questionnaireDimensionScores || {})
         .map(([d, score]) => `<li>${d}: ${score.toFixed(2)}</li>`)
         .join('');
@@ -355,6 +371,25 @@ function renderAnalysisResult(result) {
             <h4 class="font-semibold mb-2">专家评分汇总（归一化）</h4>
             <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">候选技术</th><th class="p-2 border">专家汇总分</th></tr></thead><tbody>${expertRows || '<tr><td colspan="2" class="p-2 border text-center text-gray-500">暂无专家评分</td></tr>'}</tbody></table>
         </div>
+        <div class="mt-4">
+            <h4 class="font-semibold mb-2">专家权重明细（审计）</h4>
+            <table class="w-full border text-sm">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2 border">候选技术</th>
+                        <th class="p-2 border">专家</th>
+                        <th class="p-2 border">原始评分</th>
+                        <th class="p-2 border">指标加权得分</th>
+                        <th class="p-2 border">Ca</th>
+                        <th class="p-2 border">Cs</th>
+                        <th class="p-2 border">C</th>
+                        <th class="p-2 border">归一化专家权重</th>
+                        <th class="p-2 border">贡献值</th>
+                    </tr>
+                </thead>
+                <tbody>${expertDetailRows || '<tr><td colspan="9" class="p-2 border text-center text-gray-500">暂无专家权重明细</td></tr>'}</tbody>
+            </table>
+        </div>
         <div class="mt-4 text-sm text-gray-700">
             <strong>问卷维度汇总（最近一次提交）:</strong>
             <ul class="list-disc pl-6">${questionnaireRows || '<li>暂无问卷提交数据</li>'}</ul>
@@ -366,4 +401,3 @@ function renderAnalysisResult(result) {
         reopenBtn.addEventListener('click', () => openAHPModal());
     }
 }
-

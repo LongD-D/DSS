@@ -19,5 +19,13 @@ public class ExpertEvaluationDto {
     @Min(0)
     @Max(10)
     private double score;
+    @NotNull
+    @Min(0)
+    @Max(1)
+    private Double ca;
+    @NotNull
+    @Min(0)
+    @Max(1)
+    private Double cs;
     private String comment;
 }

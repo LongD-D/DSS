@@ -4,6 +4,7 @@ import dss.dto.AHPAnalysisRequestDto;
 import dss.dto.AHPAnalysisResultDto;
 import dss.model.entity.Decision;
 import dss.model.entity.DecisionParameter;
+import dss.model.entity.ExpertEvaluation;
 import dss.model.entity.Task;
 import dss.model.entity.TaskParameter;
 import dss.model.entity.enums.OptimizationDirection;
@@ -59,7 +60,8 @@ public class AHPServiceImpl implements AHPService {
         Map<String, AHPAnalysisResultDto.ConsistencyResultDto> consistency = new LinkedHashMap<>();
         propagateWeights("ROOT", hierarchy.rootNodes(), 1.0, nodeMatrices, hierarchy.childrenByParent(), finalCriteriaWeights, consistency);
 
-        Map<String, Double> expertScores = aggregateExpertScores(task.getDecisions());
+        ExpertAggregationResult expertAggregationResult = aggregateExpertScores(task.getDecisions());
+        Map<String, Double> expertScores = expertAggregationResult.aggregatedScores;
         Map<String, Double> questionnaire = questionnaireDataService.getLatestDimensionAverage();
 
         boolean consistencyPassed = consistency.values().stream()
@@ -70,6 +72,7 @@ public class AHPServiceImpl implements AHPService {
                     .criteriaWeights(finalCriteriaWeights)
                     .consistencyByLevel(consistency)
                     .aggregatedExpertScores(expertScores)
+                    .expertWeightDetailsByDecision(expertAggregationResult.detailsByDecision)
                     .questionnaireDimensionScores(questionnaire)
                     .ranking(List.of())
                     .status("CONSISTENCY_NOT_PASSED")
@@ -104,6 +107,7 @@ public class AHPServiceImpl implements AHPService {
                 .criteriaWeights(finalCriteriaWeights)
                 .consistencyByLevel(consistency)
                 .aggregatedExpertScores(expertScores)
+                .expertWeightDetailsByDecision(expertAggregationResult.detailsByDecision)
                 .questionnaireDimensionScores(questionnaire)
                 .ranking(ranking)
                 .status("CALCULATED")
@@ -112,12 +116,66 @@ public class AHPServiceImpl implements AHPService {
                 .build();
     }
 
-    private Map<String, Double> aggregateExpertScores(List<Decision> decisions) {
-        Map<String, Double> expert = new LinkedHashMap<>();
+    private ExpertAggregationResult aggregateExpertScores(List<Decision> decisions) {
+        Map<String, Double> aggregatedScores = new LinkedHashMap<>();
+        Map<String, List<AHPAnalysisResultDto.ExpertWeightDetailDto>> detailsByDecision = new LinkedHashMap<>();
+
         for (Decision decision : decisions) {
-            expert.put(decision.getTitle(), decision.getRate() / 10.0);
+            if (decision.getExpertEvaluations() == null || decision.getExpertEvaluations().isEmpty()) {
+                aggregatedScores.put(decision.getTitle(), 0.0);
+                detailsByDecision.put(decision.getTitle(), List.of());
+                continue;
+            }
+
+            List<ExpertLocalScore> expertLocalScores = decision.getExpertEvaluations().stream()
+                    .map(evaluation -> {
+                        double indicatorWeightedScore = evaluation.getScore() / 10.0;
+                        double c = resolveExpertWeight(evaluation);
+                        return new ExpertLocalScore(evaluation, indicatorWeightedScore, c);
+                    })
+                    .toList();
+
+            double cSum = expertLocalScores.stream().mapToDouble(ExpertLocalScore::c).sum();
+            double weightedAverage = 0.0;
+            List<AHPAnalysisResultDto.ExpertWeightDetailDto> details = new ArrayList<>();
+
+            for (ExpertLocalScore localScore : expertLocalScores) {
+                double normalizedWeight = cSum > 0 ? localScore.c() / cSum : 1.0 / expertLocalScores.size();
+                double contribution = localScore.indicatorWeightedScore() * normalizedWeight;
+                weightedAverage += contribution;
+
+                details.add(AHPAnalysisResultDto.ExpertWeightDetailDto.builder()
+                        .expertId(localScore.evaluation().getExpert().getId())
+                        .expertName(localScore.evaluation().getExpert().getName())
+                        .rawScore(localScore.evaluation().getScore())
+                        .indicatorWeightedScore(localScore.indicatorWeightedScore())
+                        .ca(defaultZero(localScore.evaluation().getCa()))
+                        .cs(defaultZero(localScore.evaluation().getCs()))
+                        .c(localScore.c())
+                        .normalizedExpertWeight(normalizedWeight)
+                        .weightedContribution(contribution)
+                        .build());
+            }
+
+            aggregatedScores.put(decision.getTitle(), weightedAverage);
+            detailsByDecision.put(decision.getTitle(), details);
         }
-        return expert;
+
+        return new ExpertAggregationResult(aggregatedScores, detailsByDecision);
+    }
+
+    private double resolveExpertWeight(ExpertEvaluation evaluation) {
+        if (evaluation.getC() != null && evaluation.getC() > 0) {
+            return evaluation.getC();
+        }
+        if (evaluation.getCa() != null && evaluation.getCs() != null) {
+            return (evaluation.getCa() + evaluation.getCs()) / 2.0;
+        }
+        return 1.0;
+    }
+
+    private double defaultZero(Double value) {
+        return value == null ? 0.0 : value;
     }
 
     private MatrixResult equalWeight(int size) {
@@ -388,6 +446,13 @@ public class AHPServiceImpl implements AHPService {
     }
 
     private record MatrixResult(double[] weights, double ci, double cr) {
+    }
+
+    private record ExpertLocalScore(ExpertEvaluation evaluation, double indicatorWeightedScore, double c) {
+    }
+
+    private record ExpertAggregationResult(Map<String, Double> aggregatedScores,
+                                           Map<String, List<AHPAnalysisResultDto.ExpertWeightDetailDto>> detailsByDecision) {
     }
 
     private record Hierarchy(List<TaskParameter> rootNodes, Map<String, List<TaskParameter>> childrenByParent) {
