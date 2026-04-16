@@ -85,6 +85,11 @@ public class TestDataInitializer implements CommandLineRunner {
     private List<TaskParameter> buildTaskParameters(Task task) {
         TaskParameter p1 = TaskParameter.builder()
                 .task(task)
+                .nodeId("econ-cost")
+                .parentId(null)
+                .path("econ-cost")
+                .level(1)
+                .sortOrder(0)
                 .name("【测试信息】成本")
                 .parentCriterion("经济性")
                 .weight(0.4)
@@ -94,6 +99,11 @@ public class TestDataInitializer implements CommandLineRunner {
 
         TaskParameter p2 = TaskParameter.builder()
                 .task(task)
+                .nodeId("tech-efficiency")
+                .parentId(null)
+                .path("tech-efficiency")
+                .level(1)
+                .sortOrder(0)
                 .name("【测试信息】效率")
                 .parentCriterion("技术成熟度")
                 .weight(0.6)
