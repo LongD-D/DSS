@@ -17,6 +17,28 @@ const secondLevelByParent = taskParameters.reduce((acc, p) => {
     return acc;
 }, {});
 
+const AHP_SCALE_OPTIONS = [
+    { label: '1/9', value: 1 / 9 },
+    { label: '1/8', value: 1 / 8 },
+    { label: '1/7', value: 1 / 7 },
+    { label: '1/6', value: 1 / 6 },
+    { label: '1/5', value: 1 / 5 },
+    { label: '1/4', value: 1 / 4 },
+    { label: '1/3', value: 1 / 3 },
+    { label: '1/2', value: 1 / 2 },
+    { label: '1', value: 1 },
+    { label: '2', value: 2 },
+    { label: '3', value: 3 },
+    { label: '4', value: 4 },
+    { label: '5', value: 5 },
+    { label: '6', value: 6 },
+    { label: '7', value: 7 },
+    { label: '8', value: 8 },
+    { label: '9', value: 9 }
+];
+
+let lastSubmittedMatrices = null;
+
 fetch('http://localhost:8080/api/v1/auth/user', {
     method: 'GET',
     headers: {
@@ -98,11 +120,49 @@ function openAHPModal() {
         }
     });
 
+    if (lastSubmittedMatrices) {
+        fillMatrix('primary', lastSubmittedMatrices.primaryMatrix);
+        firstLevelCriteria.forEach(parent => {
+            const children = secondLevelByParent[parent] || [];
+            if (children.length > 1) {
+                fillMatrix(`secondary_${parent}`, lastSubmittedMatrices.secondaryMatrices?.[parent]);
+            }
+        });
+    }
+
     modal.classList.remove('hidden');
 }
 
 function matrixStorageKey() {
     return `ahp-matrix-${taskId}`;
+}
+
+function optionByLabel(label) {
+    return AHP_SCALE_OPTIONS.find(opt => opt.label === label);
+}
+
+function nearestOptionByValue(value) {
+    return AHP_SCALE_OPTIONS.reduce((best, current) => {
+        const bestDelta = Math.abs(best.value - value);
+        const currentDelta = Math.abs(current.value - value);
+        return currentDelta < bestDelta ? current : best;
+    }, AHP_SCALE_OPTIONS[0]);
+}
+
+function matrixCellSelector(key, row, col) {
+    return `select[data-matrix="${key}"][data-row="${row}"][data-col="${col}"]`;
+}
+
+function syncReciprocal(input) {
+    const matrixKey = input.dataset.matrix;
+    const row = input.dataset.row;
+    const col = input.dataset.col;
+    const current = optionByLabel(input.value) || nearestOptionByValue(1);
+    const reciprocal = nearestOptionByValue(1 / current.value);
+    const mirrored = document.querySelector(matrixCellSelector(matrixKey, col, row));
+    if (mirrored) {
+        mirrored.value = reciprocal.label;
+    }
 }
 
 function buildMatrixCard(title, key, labels) {
@@ -118,9 +178,10 @@ function buildMatrixCard(title, key, labels) {
         html += `<tr><th class="border p-2 bg-gray-100">${rowLabel}</th>`;
         labels.forEach((_, j) => {
             if (i === j) {
-                html += '<td class="border p-2 text-center"><input type="number" value="1" readonly class="w-20 text-center bg-gray-200 border-gray-300 rounded"></td>';
+                html += '<td class="border p-2 text-center"><input type="text" value="1" readonly class="w-20 text-center bg-gray-200 border-gray-300 rounded"></td>';
             } else {
-                html += `<td class="border p-2 text-center"><input type="number" step="0.01" min="0.11" value="1" class="w-20 text-center border-gray-300 rounded" data-matrix="${key}" data-row="${i}" data-col="${j}"></td>`;
+                const options = AHP_SCALE_OPTIONS.map(opt => `<option value="${opt.label}">${opt.label}</option>`).join('');
+                html += `<td class="border p-2 text-center"><select class="w-24 text-center border-gray-300 rounded" data-matrix="${key}" data-row="${i}" data-col="${j}">${options}</select></td>`;
             }
         });
         html += '</tr>';
@@ -133,6 +194,12 @@ function buildMatrixCard(title, key, labels) {
 
 document.getElementById('cancel-ahp').addEventListener('click', () => {
     document.getElementById('ahp-modal').classList.add('hidden');
+});
+
+document.getElementById('ahp-table-container').addEventListener('change', event => {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement) || !target.dataset.matrix) return;
+    syncReciprocal(target);
 });
 
 function collectMatrices() {
@@ -153,9 +220,9 @@ function fillMatrix(key, matrix) {
     for (let i = 0; i < matrix.length; i++) {
         for (let j = 0; j < matrix.length; j++) {
             if (i === j) continue;
-            const input = document.querySelector(`input[data-matrix="${key}"][data-row="${i}"][data-col="${j}"]`);
+            const input = document.querySelector(matrixCellSelector(key, i, j));
             if (input && matrix[i] && typeof matrix[i][j] === 'number') {
-                input.value = matrix[i][j];
+                input.value = nearestOptionByValue(matrix[i][j]).label;
             }
         }
     }
@@ -191,13 +258,14 @@ document.getElementById('load-ahp-matrix').addEventListener('click', () => {
 });
 
 document.getElementById('reset-ahp-matrix').addEventListener('click', () => {
-    document.querySelectorAll('#ahp-table-container input[data-matrix]').forEach(input => {
-        input.value = 1;
+    document.querySelectorAll('#ahp-table-container select[data-matrix]').forEach(input => {
+        input.value = '1';
     });
 });
 
 document.getElementById('submit-ahp').addEventListener('click', () => {
     const {primaryMatrix, secondaryMatrices} = collectMatrices();
+    lastSubmittedMatrices = { primaryMatrix, secondaryMatrices };
     fetch(`http://localhost:8080/api/v1/tasks/${taskId}/ahp-analysis`, {
         method: 'POST',
         headers: {
@@ -222,8 +290,8 @@ function collectMatrix(key, size) {
     for (let i = 0; i < size; i++) {
         matrix[i] = [];
         for (let j = 0; j < size; j++) {
-            const input = document.querySelector(`input[data-matrix="${key}"][data-row="${i}"][data-col="${j}"]`);
-            matrix[i][j] = (i === j) ? 1 : (input ? parseFloat(input.value) || 1 : 1);
+            const input = document.querySelector(matrixCellSelector(key, i, j));
+            matrix[i][j] = (i === j) ? 1 : (input ? (optionByLabel(input.value)?.value || 1) : 1);
         }
     }
     return matrix;
@@ -244,6 +312,19 @@ function renderAnalysisResult(result) {
     const rankingRows = (result.ranking || [])
         .map((item, i) => `<tr class="${i === 0 ? 'bg-green-100' : ''}"><td class="p-2 border">${item.rank}</td><td class="p-2 border">${item.decisionTitle}</td><td class="p-2 border">${item.ahpScore.toFixed(4)}</td><td class="p-2 border">${item.expertScore.toFixed(4)}</td><td class="p-2 border">${item.totalScore.toFixed(4)}</td></tr>`)
         .join('');
+
+    const consistencyFailed = result.rankingCalculated === false || result.status === 'CONSISTENCY_NOT_PASSED';
+    const consistencyHint = consistencyFailed
+        ? `<div class="mt-4 p-3 border border-yellow-400 bg-yellow-50 text-yellow-800 rounded">
+                <p class="font-semibold">一致性未通过，暂不计算最终排名。</p>
+                <p class="text-sm mt-1">${result.message || '请优先修正判断矩阵（建议重点检查 CR ≥ 0.1 的层级）。'}</p>
+                <button id="reopen-ahp-modal" class="mt-3 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded">返回矩阵继续修订</button>
+           </div>`
+        : '';
+
+    const rankingTable = consistencyFailed
+        ? '<p class="text-sm text-gray-500">一致性未通过，当前仅保存矩阵与检验结果。</p>'
+        : `<table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">排名</th><th class="p-2 border">候选技术</th><th class="p-2 border">AHP得分</th><th class="p-2 border">专家得分(归一)</th><th class="p-2 border">综合得分</th></tr></thead><tbody>${rankingRows}</tbody></table>`;
 
     const expertRows = Object.entries(result.aggregatedExpertScores || {})
         .map(([name, score]) => `<tr><td class="p-2 border">${name}</td><td class="p-2 border">${score.toFixed(4)}</td></tr>`)
@@ -267,7 +348,8 @@ function renderAnalysisResult(result) {
         </div>
         <div class="mt-4">
             <h4 class="font-semibold mb-2">候选技术综合得分与排名</h4>
-            <table class="w-full border text-sm"><thead class="bg-gray-100"><tr><th class="p-2 border">排名</th><th class="p-2 border">候选技术</th><th class="p-2 border">AHP得分</th><th class="p-2 border">专家得分(归一)</th><th class="p-2 border">综合得分</th></tr></thead><tbody>${rankingRows}</tbody></table>
+            ${rankingTable}
+            ${consistencyHint}
         </div>
         <div class="mt-4">
             <h4 class="font-semibold mb-2">专家评分汇总（归一化）</h4>
@@ -278,4 +360,10 @@ function renderAnalysisResult(result) {
             <ul class="list-disc pl-6">${questionnaireRows || '<li>暂无问卷提交数据</li>'}</ul>
         </div>
     `;
+
+    const reopenBtn = document.getElementById('reopen-ahp-modal');
+    if (reopenBtn) {
+        reopenBtn.addEventListener('click', () => openAHPModal());
+    }
 }
+

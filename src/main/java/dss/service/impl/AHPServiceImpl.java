@@ -59,12 +59,28 @@ public class AHPServiceImpl implements AHPService {
         Map<String, AHPAnalysisResultDto.ConsistencyResultDto> consistency = new LinkedHashMap<>();
         propagateWeights("ROOT", hierarchy.rootNodes(), 1.0, nodeMatrices, hierarchy.childrenByParent(), finalCriteriaWeights, consistency);
 
+        Map<String, Double> expertScores = aggregateExpertScores(task.getDecisions());
+        Map<String, Double> questionnaire = questionnaireDataService.getLatestDimensionAverage();
+
+        boolean consistencyPassed = consistency.values().stream()
+                .allMatch(AHPAnalysisResultDto.ConsistencyResultDto::isConsistent);
+
+        if (!consistencyPassed) {
+            return AHPAnalysisResultDto.builder()
+                    .criteriaWeights(finalCriteriaWeights)
+                    .consistencyByLevel(consistency)
+                    .aggregatedExpertScores(expertScores)
+                    .questionnaireDimensionScores(questionnaire)
+                    .ranking(List.of())
+                    .status("CONSISTENCY_NOT_PASSED")
+                    .rankingCalculated(false)
+                    .message("一致性检验未通过（存在 CR >= 0.1 的层级），结果已保存，请修正判断矩阵后重新提交。")
+                    .build();
+        }
+
         double[][] decisionMatrix = buildDecisionMatrix(task, parameters);
         double[][] normalized = normalizeDecisionMatrix(parameters, decisionMatrix);
         double[] ahpScores = calculateScores(normalized, parameters, finalCriteriaWeights);
-
-        Map<String, Double> expertScores = aggregateExpertScores(task.getDecisions());
-        Map<String, Double> questionnaire = questionnaireDataService.getLatestDimensionAverage();
 
         List<AHPAnalysisResultDto.RankedResultDto> ranking = new ArrayList<>();
         for (int i = 0; i < task.getDecisions().size(); i++) {
@@ -90,6 +106,9 @@ public class AHPServiceImpl implements AHPService {
                 .aggregatedExpertScores(expertScores)
                 .questionnaireDimensionScores(questionnaire)
                 .ranking(ranking)
+                .status("CALCULATED")
+                .rankingCalculated(true)
+                .message("一致性通过，已完成综合排名计算。")
                 .build();
     }
 
