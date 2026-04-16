@@ -6,220 +6,161 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
-<header class="fixed top-0 left-0 w-full z-50 bg-white shadow-md">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        <a href="/tasks" class="text-2xl font-bold text-blue-600">DSS 系统</a>
-
-        <nav class="flex items-center gap-6 text-gray-700 font-semibold">
-            <a href="/analyst/dashboard" class="hover:text-blue-600">分析员工作台</a>
-            <a href="/questionnaire" class="hover:text-blue-600">问卷</a>
-            <a href="/tasks" class="hover:text-blue-600">技术分析</a>
-            <a href="/decisions" class="hover:text-blue-600">决策分析</a>
-            <a href="/admin/dashboard" id="admin-link" class="hover:text-blue-600 hidden">管理后台</a>
-            <a href="/login" id="login-link" class="hover:text-blue-600 hidden">登录</a>
-            <a href="/logout" id="logout-link" class="hover:text-red-600 hidden">退出</a>
-        </nav>
-    </div>
-</header>
-<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+<div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
     <h1 class="text-3xl font-bold mb-6 text-center">编辑分析与评价任务</h1>
     <input type="hidden" id="taskId" th:value="${task.id}">
 
-
     <form id="edit-task-form" class="space-y-4">
-        <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="title">分析任务名称</label>
-            <input type="text" id="title" class="w-full border rounded px-4 py-2" th:value="${task.title}">
-        </div>
+        <input type="text" id="title" class="w-full border rounded px-4 py-2" th:value="${task.title}">
+        <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" th:text="${task.description}"></textarea>
+        <select id="category" class="w-full border rounded px-4 py-2">
+            <option value="ENERGETIC" th:selected="${task.category.name() == 'ENERGETIC'}">能源</option>
+            <option value="ECONOMY" th:selected="${task.category.name() == 'ECONOMY'}">经济</option>
+            <option value="ECOLOGY" th:selected="${task.category.name() == 'ECOLOGY'}">生态</option>
+        </select>
+        <select id="status" class="w-full border rounded px-4 py-2">
+            <option value="NEW" th:selected="${task.status.name() == 'NEW'}">新建</option>
+            <option value="SOLVED" th:selected="${task.status.name() == 'SOLVED'}">已解决</option>
+            <option value="EMERGENCY" th:selected="${task.status.name() == 'EMERGENCY'}">紧急</option>
+        </select>
 
         <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="description">分析任务描述</label>
-            <textarea id="description" class="w-full border rounded px-4 py-2" rows="4" th:text="${task.description}"></textarea>
-        </div>
-
-        <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="category">类别</label>
-            <select id="category" class="w-full border rounded px-4 py-2">
-                <option value="ENERGETIC" th:selected="${task.category.name() == 'ENERGETIC'}">能源</option>
-                <option value="ECONOMY" th:selected="${task.category.name() == 'ECONOMY'}">经济</option>
-                <option value="ECOLOGY" th:selected="${task.category.name() == 'ECOLOGY'}">生态</option>
-            </select>
-        </div>
-
-        <div>
-            <label class="block text-gray-700 font-semibold mb-2" for="status">状态</label>
-            <select id="status" class="w-full border rounded px-4 py-2">
-                <option value="NEW" th:selected="${task.status.name() == 'NEW'}">新建</option>
-                <option value="SOLVED" th:selected="${task.status.name() == 'SOLVED'}">已解决</option>
-                <option value="EMERGENCY" th:selected="${task.status.name() == 'EMERGENCY'}">紧急</option>
-            </select>
-        </div>
-
-        <!-- 参数 -->
-        <div>
-            <h2 class="text-xl font-semibold mt-6 mb-2"> 评价指标（二级）</h2>
-            <div id="parameters-container" class="space-y-4">
-                <div th:each="parameter : ${task.taskParameters}" class="border p-4 rounded bg-gray-50 parameter-block relative">
-                    <div class="grid grid-cols-5 gap-3">
-                        <input type="text" class="param-parent w-full border rounded px-2 py-1" th:value="${parameter.parentCriterion}" placeholder="一级指标（如 技术成熟度）">
-                        <input type="text" class="param-name w-full border rounded px-2 py-1" th:value="${parameter.name}" placeholder="二级指标名称">
-                        <input type="number" step="0.01" class="param-weight w-full border rounded px-2 py-1" th:value="${parameter.weight}" placeholder="权重">
-                        <input type="text" class="param-unit w-full border rounded px-2 py-1" th:value="${parameter.unit}" placeholder="单位 单位">
-                        <select name="optimizationDirection" id="optimizationDirection">
-                            <option th:each="dir : ${T(dss.model.entity.enums.OptimizationDirection).values()}"
-                                    th:value="${dir}"
-                                    th:text="${dir.label}"
-                                    th:selected="${dir == parameter.optimizationDirection}">
-                            </option>
-                        </select>
-                        <button type="button" class="delete-param bg-red-500 text-white rounded px-3 py-1">✕</button>
-                    </div>
-                </div>
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xl font-semibold">指标节点管理（支持多层级）</h2>
+                <button type="button" id="add-param" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">添加节点</button>
             </div>
-            <button type="button" id="add-param" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg">
-                添加二级指标
-            </button>
+            <div id="parameters-container" class="space-y-3"></div>
         </div>
 
         <div class="flex justify-center mt-8">
-            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">
-                保存修改
-            </button>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg">保存修改</button>
         </div>
     </form>
 </div>
 
+<script th:inline="javascript">
+    const initialParameters = /*[[${task.taskParameters}]]*/ [];
+</script>
 <script>
-    // 提取任务 ID
     const taskId = parseInt(document.getElementById('taskId').value);
-
-    // 从 localStorage 获取 token
     const token = localStorage.getItem('token');
+    const container = document.getElementById('parameters-container');
 
-    // 添加新参数
-    document.getElementById('add-param').addEventListener('click', () => {
-        const container = document.getElementById('parameters-container');
-        const paramBlock = document.createElement('div');
-        paramBlock.className = 'border p-4 rounded bg-gray-50 parameter-block relative mt-2';
-        paramBlock.innerHTML = `
-        <div class="grid grid-cols-5 gap-3">
-            <input type="text" class="param-parent w-full border rounded px-2 py-1" placeholder="一级指标（如 技术成熟度）">
-            <input type="text" class="param-name w-full border rounded px-2 py-1" placeholder="二级指标名称">
-            <input type="number" step="0.01" class="param-weight w-full border rounded px-2 py-1" placeholder="权重">
-            <input type="text" class="param-unit w-full border rounded px-2 py-1" placeholder="单位">
-            <select id="optimizationDirection" class="w-full border rounded px-4 py-2">
-                <option>最大化</option>
-                <option>最小化</option>
-            </select>
-            <button type="button" class="delete-param bg-red-500 text-white rounded px-3 py-1">✕</button>
-        </div>`;
-        container.appendChild(paramBlock);
-        attachDeleteHandlers();
-    });
+    function newNodeId() { return (window.crypto?.randomUUID?.() || ('node-' + Date.now() + '-' + Math.random().toString(16).slice(2))); }
+    function getOptDir(block) { return (block.querySelector('.opt-dir').value === '最小化' || block.querySelector('.opt-dir').value === 'MINIMIZE') ? 'MINIMIZE' : 'MAXIMIZE'; }
 
-    // 提交表单
-    document.getElementById('edit-task-form').addEventListener('submit', function(event) {
-        event.preventDefault();
-
-        const title = document.getElementById('title').value;
-        const description = document.getElementById('description').value;
-        const category = document.getElementById('category').value;
-        const status = document.getElementById('status').value;
-        function getOptDir(block){
-            let optimizationDirection;
-
-            if (block.querySelector('#optimizationDirection').value === '最小化'){
-                optimizationDirection = 'MINIMIZE';
-            }
-            else if (block.querySelector('#optimizationDirection').value === '最大化'){
-                optimizationDirection = 'MAXIMIZE';
-            }
-            else if (block.querySelector('#optimizationDirection').value === 'MINIMIZE'){
-                optimizationDirection = 'MINIMIZE';
-            }
-            else if (block.querySelector('#optimizationDirection').value === 'MAXIMIZE'){
-                optimizationDirection = 'MAXIMIZE';
-            }
-            console.log(optimizationDirection)
-            return optimizationDirection;
-        }
-
-
-        const parameters = [];
-        document.querySelectorAll('.parameter-block').forEach(block => {
-            parameters.push({
-                name: block.querySelector('.param-name').value,
-                parentCriterion: block.querySelector('.param-parent').value,
-                weight: parseFloat(block.querySelector('.param-weight').value),
-                unit: block.querySelector('.param-unit').value,
-                optimizationDirection: getOptDir(block)
+    function refreshParentOptions() {
+        const nodes = [...document.querySelectorAll('.parameter-block')];
+        const choices = nodes.map(b => ({id: b.querySelector('.param-node-id').value, name: b.querySelector('.param-name').value || '未命名节点'}));
+        nodes.forEach(block => {
+            const current = block.querySelector('.param-parent-id').value;
+            const selfId = block.querySelector('.param-node-id').value;
+            const select = block.querySelector('.param-parent-id');
+            select.innerHTML = '<option value="">(根节点)</option>';
+            choices.filter(c => c.id !== selfId).forEach(c => {
+                const o = document.createElement('option'); o.value = c.id; o.textContent = c.name;
+                if (current === c.id) o.selected = true;
+                select.appendChild(o);
             });
         });
+    }
 
-        const taskData = {
-            title,
-            description,
-            category,
-            status,
-            taskParameters: parameters
-        };
+    function recomputeHierarchy() {
+        const blocks = [...document.querySelectorAll('.parameter-block')];
+        const byId = new Map(blocks.map(b => [b.querySelector('.param-node-id').value, b]));
+        function calc(block, seen = new Set()) {
+            const nodeId = block.querySelector('.param-node-id').value;
+            const parentId = block.querySelector('.param-parent-id').value;
+            if (!parentId || !byId.get(parentId) || seen.has(nodeId)) return { level: 1, path: nodeId };
+            seen.add(nodeId);
+            const parentMeta = calc(byId.get(parentId), seen);
+            return { level: parentMeta.level + 1, path: parentMeta.path + '/' + nodeId };
+        }
+        blocks.forEach((b, i) => {
+            const meta = calc(b);
+            b.querySelector('.param-level').value = meta.level;
+            b.querySelector('.param-path').value = meta.path;
+            b.querySelector('.param-sort-order').value = i;
+        });
+    }
 
-        console.log(JSON.stringify(taskData))
+    function attachHandlers(block) {
+        block.querySelector('.delete-param').onclick = () => { block.remove(); refreshParentOptions(); recomputeHierarchy(); };
+        block.querySelector('.move-up').onclick = () => { const prev = block.previousElementSibling; if (prev) container.insertBefore(block, prev); recomputeHierarchy(); };
+        block.querySelector('.move-down').onclick = () => { const next = block.nextElementSibling; if (next) container.insertBefore(next, block); recomputeHierarchy(); };
+        block.querySelectorAll('.param-name,.param-parent-id').forEach(el => el.addEventListener('change', () => { refreshParentOptions(); recomputeHierarchy(); }));
+    }
+
+    function addNode(defaults = {}) {
+        const block = document.createElement('div');
+        block.className = 'border p-4 rounded bg-gray-50 parameter-block';
+        block.innerHTML = `
+          <input type="hidden" class="param-node-id" value="${defaults.nodeId || newNodeId()}">
+          <div class="grid grid-cols-5 gap-3 mb-2">
+            <input type="text" class="param-name border rounded px-2 py-1" placeholder="节点名称" value="${defaults.name || ''}">
+            <select class="param-parent-id border rounded px-2 py-1"></select>
+            <input type="number" step="0.01" class="param-weight border rounded px-2 py-1" placeholder="权重" value="${defaults.weight ?? 0}">
+            <input type="text" class="param-unit border rounded px-2 py-1" placeholder="单位" value="${defaults.unit || ''}">
+            <select class="opt-dir border rounded px-2 py-1"><option ${defaults.optimizationDirection === 'MAXIMIZE' ? 'selected' : ''}>最大化</option><option ${defaults.optimizationDirection === 'MINIMIZE' ? 'selected' : ''}>最小化</option></select>
+          </div>
+          <div class="grid grid-cols-5 gap-3 mb-2">
+            <input type="number" class="param-level border rounded px-2 py-1 bg-gray-100" readonly>
+            <input type="text" class="param-path border rounded px-2 py-1 bg-gray-100 col-span-2" readonly>
+            <input type="number" class="param-sort-order border rounded px-2 py-1" readonly>
+            <div class="flex gap-2">
+              <button type="button" class="move-up bg-gray-500 text-white rounded px-2">↑</button>
+              <button type="button" class="move-down bg-gray-500 text-white rounded px-2">↓</button>
+              <button type="button" class="delete-param bg-red-500 text-white rounded px-2">✕</button>
+            </div>
+          </div>`;
+        container.appendChild(block);
+        attachHandlers(block);
+        refreshParentOptions();
+        if (defaults.parentId) block.querySelector('.param-parent-id').value = defaults.parentId;
+        recomputeHierarchy();
+    }
+
+    document.getElementById('add-param').addEventListener('click', () => addNode());
+
+    (initialParameters || []).forEach(p => addNode({
+        nodeId: p.nodeId || `param-${p.id}`,
+        parentId: p.parentId,
+        name: p.name,
+        weight: p.weight,
+        unit: p.unit,
+        optimizationDirection: p.optimizationDirection
+    }));
+
+    document.getElementById('edit-task-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        recomputeHierarchy();
+        const parameters = [...document.querySelectorAll('.parameter-block')].map(block => {
+            const parentSelect = block.querySelector('.param-parent-id');
+            return {
+                nodeId: block.querySelector('.param-node-id').value,
+                parentId: parentSelect.value || null,
+                path: block.querySelector('.param-path').value,
+                level: parseInt(block.querySelector('.param-level').value || '1'),
+                sortOrder: parseInt(block.querySelector('.param-sort-order').value || '0'),
+                name: block.querySelector('.param-name').value,
+                parentCriterion: parentSelect.value ? (parentSelect.selectedOptions[0]?.textContent || null) : null,
+                weight: parseFloat(block.querySelector('.param-weight').value || '0'),
+                unit: block.querySelector('.param-unit').value,
+                optimizationDirection: getOptDir(block)
+            };
+        });
 
         fetch(`http://localhost:8080/api/v1/tasks/${taskId}`, {
             method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(taskData)
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert('任务更新成功！');
-                    window.location.href = '/tasks/'+taskId; // 返回到 任务
-                } else {
-                    alert('错误 更新 任务!');
-                }
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                status: document.getElementById('status').value,
+                taskParameters: parameters
             })
-            .catch(error => console.error('错误： 更新时:', error));
-    });
-    // 删除参数
-    function attachDeleteHandlers() {
-        document.querySelectorAll('.delete-param').forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.target.closest('.parameter-block').remove();
-            });
-        });
-    }
-    attachDeleteHandlers();
-</script>
-<script>
-    const token = localStorage.getItem('token');
-
-    if (token) {
-        document.getElementById('login-link')?.classList.add('hidden');
-        document.getElementById('logout-link')?.classList.remove('hidden');
-
-        fetch('/api/v1/auth/user', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.ok ? res.json() : Promise.reject())
-            .then(user => {
-                const roles = user.roles.map(r => r.name);
-                if (roles.includes('ROLE_ADMIN')) {
-                    document.getElementById('admin-link')?.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                localStorage.removeItem('token');
-                window.location.href = '/login';
-            });
-    }
-
-    document.getElementById('logout-link')?.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        }).then(r => r.ok ? (alert('任务更新成功！'), location.href=`/tasks/${taskId}`) : alert('错误 更新 任务!'));
     });
 </script>
 </body>

@@ -9,9 +9,13 @@ import lombok.Data;
 @Data
 @Builder
 public class TaskParameterDto {
+    private String nodeId;
+    private String parentId;
+    private String path;
+    private Integer level;
+    private Integer sortOrder;
     @NotBlank
     private String name;
-    @NotBlank
     private String parentCriterion;
     @NotNull
     private double weight;

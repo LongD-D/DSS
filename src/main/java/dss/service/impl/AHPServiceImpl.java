@@ -52,38 +52,12 @@ public class AHPServiceImpl implements AHPService {
             throw new IllegalArgumentException("任务下不存在候选技术");
         }
 
-        Map<String, List<TaskParameter>> grouped = parameters.stream()
-                .collect(Collectors.groupingBy(
-                        p -> Optional.ofNullable(p.getParentCriterion()).orElse("默认一级指标"),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<String> primaryNames = new ArrayList<>(grouped.keySet());
-        MatrixResult primaryResult = calculatePrimaryMatrixResult(requestDto, primaryNames.size());
+        Hierarchy hierarchy = buildHierarchy(parameters);
+        Map<String, List<List<Double>>> nodeMatrices = resolveNodeMatrices(requestDto, hierarchy);
 
         Map<String, Double> finalCriteriaWeights = new LinkedHashMap<>();
         Map<String, AHPAnalysisResultDto.ConsistencyResultDto> consistency = new LinkedHashMap<>();
-        consistency.put("一级指标", toConsistency(primaryResult));
-
-        for (int i = 0; i < primaryNames.size(); i++) {
-            String parent = primaryNames.get(i);
-            List<TaskParameter> children = grouped.get(parent);
-            List<List<Double>> matrix = requestDto.getSecondaryMatrices() == null
-                    ? null : requestDto.getSecondaryMatrices().get(parent);
-
-            MatrixResult secondaryResult = (matrix == null || matrix.isEmpty())
-                    ? equalWeight(children.size())
-                    : calculateMatrixResult(matrix);
-            consistency.put("二级指标-" + parent, toConsistency(secondaryResult));
-
-            double primaryWeight = i < primaryResult.weights.length ? primaryResult.weights[i] : 0.0;
-            for (int j = 0; j < children.size(); j++) {
-                TaskParameter parameter = children.get(j);
-                double childWeight = j < secondaryResult.weights.length ? secondaryResult.weights[j] : 0.0;
-                finalCriteriaWeights.put(parameter.getName(), primaryWeight * childWeight);
-            }
-        }
+        propagateWeights("ROOT", hierarchy.rootNodes(), 1.0, nodeMatrices, hierarchy.childrenByParent(), finalCriteriaWeights, consistency);
 
         double[][] decisionMatrix = buildDecisionMatrix(task, parameters);
         double[][] normalized = normalizeDecisionMatrix(parameters, decisionMatrix);
@@ -194,6 +168,105 @@ public class AHPServiceImpl implements AHPService {
         return calculateMatrixResult(requestDto.getPrimaryMatrix());
     }
 
+    private void propagateWeights(String parentKey,
+                                  List<TaskParameter> children,
+                                  double parentWeight,
+                                  Map<String, List<List<Double>>> matrices,
+                                  Map<String, List<TaskParameter>> childrenByParent,
+                                  Map<String, Double> finalLeafWeights,
+                                  Map<String, AHPAnalysisResultDto.ConsistencyResultDto> consistency) {
+        if (children == null || children.isEmpty()) {
+            return;
+        }
+
+        MatrixResult local = evaluateLocalMatrix(parentKey, children, matrices);
+        consistency.put(parentKey, toConsistency(local));
+
+        for (int i = 0; i < children.size(); i++) {
+            TaskParameter node = children.get(i);
+            double propagated = parentWeight * (i < local.weights.length ? local.weights[i] : 0.0);
+            List<TaskParameter> subNodes = childrenByParent.getOrDefault(node.getNodeId(), List.of());
+            if (subNodes.isEmpty()) {
+                finalLeafWeights.put(node.getName(), propagated);
+            } else {
+                propagateWeights(node.getNodeId(), subNodes, propagated, matrices, childrenByParent, finalLeafWeights, consistency);
+            }
+        }
+    }
+
+    private MatrixResult evaluateLocalMatrix(String parentKey,
+                                             List<TaskParameter> children,
+                                             Map<String, List<List<Double>>> matrices) {
+        if (children.size() == 1) {
+            return new MatrixResult(new double[]{1.0}, 0.0, 0.0);
+        }
+        List<List<Double>> matrix = matrices.get(parentKey);
+        if (matrix == null || matrix.isEmpty()) {
+            return equalWeight(children.size());
+        }
+        if (matrix.size() != children.size()) {
+            throw new IllegalArgumentException("判断矩阵维度与子节点数量不一致，父节点: " + parentKey);
+        }
+        return calculateMatrixResult(matrix);
+    }
+
+    private Hierarchy buildHierarchy(List<TaskParameter> parameters) {
+        Map<String, TaskParameter> byNodeId = parameters.stream()
+                .collect(Collectors.toMap(
+                        p -> resolveNodeId(p),
+                        p -> p,
+                        (a, b) -> a,
+                        LinkedHashMap::new
+                ));
+
+        Map<String, List<TaskParameter>> childrenByParent = parameters.stream()
+                .filter(p -> p.getParentId() != null && !p.getParentId().isBlank() && byNodeId.containsKey(p.getParentId()))
+                .collect(Collectors.groupingBy(TaskParameter::getParentId, LinkedHashMap::new, Collectors.toList()));
+        childrenByParent.values().forEach(this::sortNodes);
+
+        List<TaskParameter> roots = parameters.stream()
+                .filter(p -> p.getParentId() == null || p.getParentId().isBlank() || !byNodeId.containsKey(p.getParentId()))
+                .collect(Collectors.toCollection(ArrayList::new));
+        sortNodes(roots);
+
+        return new Hierarchy(roots, childrenByParent);
+    }
+
+    private Map<String, List<List<Double>>> resolveNodeMatrices(AHPAnalysisRequestDto requestDto, Hierarchy hierarchy) {
+        if (requestDto == null) {
+            return Map.of();
+        }
+        if (requestDto.getNodeMatrices() != null && !requestDto.getNodeMatrices().isEmpty()) {
+            return requestDto.getNodeMatrices();
+        }
+
+        Map<String, List<List<Double>>> converted = new LinkedHashMap<>();
+        if (requestDto.getPrimaryMatrix() != null && !requestDto.getPrimaryMatrix().isEmpty()) {
+            converted.put("ROOT", requestDto.getPrimaryMatrix());
+        }
+        if (requestDto.getSecondaryMatrices() != null && !requestDto.getSecondaryMatrices().isEmpty()) {
+            Map<String, TaskParameter> rootByName = hierarchy.rootNodes().stream()
+                    .collect(Collectors.toMap(TaskParameter::getName, p -> p, (a, b) -> a, LinkedHashMap::new));
+            requestDto.getSecondaryMatrices().forEach((parentName, matrix) -> {
+                TaskParameter parent = rootByName.get(parentName);
+                if (parent != null) {
+                    converted.put(resolveNodeId(parent), matrix);
+                }
+            });
+        }
+        return converted;
+    }
+
+    private String resolveNodeId(TaskParameter node) {
+        return (node.getNodeId() == null || node.getNodeId().isBlank())
+                ? "PARAM-" + node.getId()
+                : node.getNodeId();
+    }
+
+    private void sortNodes(List<TaskParameter> nodes) {
+        nodes.sort(Comparator.comparingInt(p -> Optional.ofNullable(p.getSortOrder()).orElse(0)));
+    }
+
     private List<List<Double>> toList(double[][] matrix) {
         List<List<Double>> result = new ArrayList<>();
         for (double[] row : matrix) {
@@ -296,5 +369,8 @@ public class AHPServiceImpl implements AHPService {
     }
 
     private record MatrixResult(double[] weights, double ci, double cr) {
+    }
+
+    private record Hierarchy(List<TaskParameter> rootNodes, Map<String, List<TaskParameter>> childrenByParent) {
     }
 }

@@ -27,6 +27,34 @@ public class TaskParameter {
      */
     private String parentCriterion;
 
+    /**
+     * 指标节点ID（用于构建多级树）
+     */
+    @Column(length = 64)
+    private String nodeId;
+
+    /**
+     * 父节点ID，根节点为空
+     */
+    @Column(length = 64)
+    private String parentId;
+
+    /**
+     * 层级路径，如 root/tech/cost
+     */
+    @Column(length = 255)
+    private String path;
+
+    /**
+     * 当前节点层级，根为 1
+     */
+    private Integer level;
+
+    /**
+     * 同级排序号
+     */
+    private Integer sortOrder;
+
     @NotNull
     private double weight;
 

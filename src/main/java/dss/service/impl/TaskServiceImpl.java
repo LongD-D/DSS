@@ -20,8 +20,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,14 +65,11 @@ public class TaskServiceImpl implements TaskService {
         if (taskDto.getTaskParameters() != null) {
             for (TaskParameterDto paramDto : taskDto.getTaskParameters()) {
                 var param = new TaskParameter();
-                param.setName(paramDto.getName());
-                param.setParentCriterion(paramDto.getParentCriterion());
-                param.setWeight(paramDto.getWeight());
-                param.setUnit(paramDto.getUnit());
-                param.setOptimizationDirection(paramDto.getOptimizationDirection());
+                fillTaskParameter(param, paramDto);
                 param.setTask(task); // 与 task
                 parameterList.add(param);
             }
+            rebuildHierarchy(parameterList);
         }
 
         task.setTaskParameters(parameterList);
@@ -91,14 +92,11 @@ public class TaskServiceImpl implements TaskService {
         for(TaskParameterDto taskParameterDto : taskParameterDtoList){
             var taskParameter = new TaskParameter();
             taskParameter.setTask(task);
-            taskParameter.setName(taskParameterDto.getName());
-            taskParameter.setParentCriterion(taskParameterDto.getParentCriterion());
-            taskParameter.setWeight(taskParameterDto.getWeight());
-            taskParameter.setUnit(taskParameterDto.getUnit());
-            taskParameter.setOptimizationDirection(taskParameterDto.getOptimizationDirection());
+            fillTaskParameter(taskParameter, taskParameterDto);
             System.out.println(taskParameter.getOptimizationDirection().getLabel());
             taskParameterList.add(taskParameter);
         }
+        rebuildHierarchy(taskParameterList);
         task.setTaskParameters(taskParameterList);
         return taskRepository.save(task);
     }
@@ -125,15 +123,12 @@ public class TaskServiceImpl implements TaskService {
 
             for (TaskParameterDto dto : taskDto.getTaskParameters()) {
                 TaskParameter param = existing.getOrDefault(dto.getName(), new TaskParameter());
-                param.setName(dto.getName());
-                param.setParentCriterion(dto.getParentCriterion());
-                param.setWeight(dto.getWeight());
-                param.setUnit(dto.getUnit());
+                fillTaskParameter(param, dto);
                 param.setTask(task);
-                param.setOptimizationDirection(dto.getOptimizationDirection());
                 updatedList.add(param);
             }
 
+            rebuildHierarchy(updatedList);
             task.getTaskParameters().clear();
             task.getTaskParameters().addAll(updatedList);
         }
@@ -241,6 +236,75 @@ public class TaskServiceImpl implements TaskService {
 
         // 若方向不同，则使用 TOPSIS
         return "TOPSIS";
+    }
+
+    private void fillTaskParameter(TaskParameter param, TaskParameterDto dto) {
+        param.setName(dto.getName());
+        param.setParentCriterion(dto.getParentCriterion());
+        param.setWeight(dto.getWeight());
+        param.setUnit(dto.getUnit());
+        param.setOptimizationDirection(dto.getOptimizationDirection());
+        param.setNodeId((dto.getNodeId() == null || dto.getNodeId().isBlank())
+                ? UUID.randomUUID().toString()
+                : dto.getNodeId());
+        param.setParentId(dto.getParentId());
+        param.setPath(dto.getPath());
+        param.setLevel(dto.getLevel());
+        param.setSortOrder(dto.getSortOrder() == null ? 0 : dto.getSortOrder());
+    }
+
+    private void rebuildHierarchy(List<TaskParameter> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return;
+        }
+        parameters.forEach(p -> {
+            if (p.getNodeId() == null || p.getNodeId().isBlank()) {
+                p.setNodeId(UUID.randomUUID().toString());
+            }
+            if (p.getSortOrder() == null) {
+                p.setSortOrder(0);
+            }
+        });
+
+        Map<String, TaskParameter> byNode = parameters.stream()
+                .collect(Collectors.toMap(TaskParameter::getNodeId, p -> p, (a, b) -> a, LinkedHashMap::new));
+
+        Map<String, List<TaskParameter>> children = parameters.stream()
+                .filter(p -> p.getParentId() != null && !p.getParentId().isBlank() && byNode.containsKey(p.getParentId()))
+                .collect(Collectors.groupingBy(TaskParameter::getParentId, LinkedHashMap::new, Collectors.toList()));
+
+        children.values().forEach(list -> list.sort(Comparator.comparingInt(TaskParameter::getSortOrder)));
+
+        List<TaskParameter> roots = parameters.stream()
+                .filter(p -> p.getParentId() == null || p.getParentId().isBlank() || !byNode.containsKey(p.getParentId()))
+                .sorted(Comparator.comparingInt(TaskParameter::getSortOrder))
+                .toList();
+
+        for (int i = 0; i < roots.size(); i++) {
+            assignNodeMetadata(roots.get(i), null, 1, i, children, byNode);
+        }
+    }
+
+    private void assignNodeMetadata(TaskParameter node,
+                                    TaskParameter parent,
+                                    int level,
+                                    int index,
+                                    Map<String, List<TaskParameter>> children,
+                                    Map<String, TaskParameter> byNode) {
+        node.setLevel(level);
+        node.setSortOrder(index);
+        node.setPath(parent == null ? node.getNodeId() : parent.getPath() + "/" + node.getNodeId());
+        node.setParentId(parent == null ? null : parent.getNodeId());
+        node.setParentCriterion(parent == null ? null : parent.getName());
+
+        List<TaskParameter> childNodes = children.getOrDefault(node.getNodeId(), List.of()).stream()
+                .filter(Objects::nonNull)
+                .filter(c -> byNode.containsKey(c.getNodeId()))
+                .sorted(Comparator.comparingInt(TaskParameter::getSortOrder))
+                .toList();
+        for (int i = 0; i < childNodes.size(); i++) {
+            assignNodeMetadata(childNodes.get(i), node, level + 1, i, children, byNode);
+        }
     }
 
 
