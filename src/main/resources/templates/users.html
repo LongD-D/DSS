@@ -65,10 +65,14 @@
 <script>
     const token = localStorage.getItem('token');
 
+    if (!token) {
+        window.location.href = '/login';
+    }
+
     fetch('/api/v1/auth/user', {
         headers: { 'Authorization': `Bearer ${token}` }
     })
-        .then(res => res.json())
+        .then(res => res.ok ? res.json() : Promise.reject(new Error('unauthorized')))
         .then(user => {
             const roles = user.roles.map(r => r.name);
             if (!roles.includes('ROLE_ADMIN')) {
@@ -79,7 +83,10 @@
                 setupRoleChangeHandlers();
             }
         })
-        .catch(() => window.location.href = '/login');
+        .catch(() => {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        });
 
     function setupRoleChangeHandlers() {
         const rows = document.querySelectorAll('#user-table-body tr');
@@ -137,6 +144,12 @@
             });
         });
     }
+
+    document.getElementById('logout-link')?.addEventListener('click', (event) => {
+        event.preventDefault();
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    });
 </script>
 </body>
 </html>
